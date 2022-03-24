@@ -61,7 +61,13 @@ def logout():
     return redirect("/")
 
 
+@app.route("/profile")
+def profile():
+    return render_template("profile.html", title='КЕГЭ')
+
+
 @app.route("/")
+@app.route("/index")
 def index():
     return render_template("index.html", title='КЕГЭ')
 

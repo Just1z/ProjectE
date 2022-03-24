@@ -19,7 +19,7 @@
 <body class="text-center">
 <form class="form-signin" action="" method="post">
     {{ form.hidden_tag() }}
-    <img class="mb-4" src="./login_files/bootstrap-solid.svg" alt="логотип bootstrap" width="72" height="72">
+    <a class="h2" style="color: #2160A6; text-decoration:none;" href="/index">КЕГЭ</a>
     <h1 class="h3 mb-3 font-weight-normal">Войдите</h1>
     <div>{{ message }}</div>
     <label for="inputEmail" class="sr-only">Email</label>
@@ -39,7 +39,7 @@
     <div class="checkbox">
         <label>{{ form.remember_me() }} {{ form.remember_me.label }}</label>
     </div>
-    {{ form.submit(type="submit", class="btn btn-primary") }}
+    <div class="btn-submit">{{ form.submit(type="submit", class="btn btn-primary") }}</div>
 </form>
 </body>
 </html>

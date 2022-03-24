@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css')}}"/>
+    {% block head %}{% endblock %}
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
             integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
             crossorigin="anonymous"></script>
@@ -28,7 +29,7 @@
         <div class="collapse navbar-collapse" id="navbarsExampleDefault">
             <ul class="navbar-nav mr-auto mb-2 mb-md-0">
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="#">Главная</a>
+                    <a class="nav-link" aria-current="page" href="/">Главная</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">База заданий</a>
@@ -36,10 +37,24 @@
             </ul>
             <div>
                 {% if current_user.is_authenticated %}
-                    <a class="navbar-brand" href="/logout">{{ current_user.name }}</a>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+                       id="dropdownUser" data-toggle="dropdown" data-display="static" aria-expanded="false">
+                        <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+                        <strong>{{ current_user.name }}</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownUser">
+                        <li><a class="dropdown-item" href="#">Новый вариант</a></li>
+                        <li><a class="dropdown-item" href="/profile">Профиль</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" href="/logout">Выйти</a></li>
+                    </ul>
+                </div>
                 {% else %}
-                    <a class="btn btn-light " href="/register">Зарегистрироваться</a>
-                    <a class="btn btn-dark" href="/login">Войти</a>
+                <a class="btn btn-light " href="/register">Зарегистрироваться</a>
+                <a class="btn btn-dark" href="/login">Войти</a>
                 {% endif %}
             </div>
         </div>
