@@ -1,2 +1,7 @@
 .vscode/
 .idea/
+/venv/
+/idea/
+data/__pycache__/
+forms/__pycache__/
+kpolyakov/

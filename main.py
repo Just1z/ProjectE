@@ -67,6 +67,11 @@ def profile():
     return render_template("profile.html", title='КЕГЭ')
 
 
+@app.route("/case")
+def case():
+    return render_template("case.html", title='КЕГЭ', kim_number='-', br_number='2832503195017')
+
+
 @app.route("/")
 @app.route("/index")
 def index():

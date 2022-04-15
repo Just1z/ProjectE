@@ -1,0 +1,53 @@
+body {
+    background: #6977db29!important;
+}
+
+.carousel-control-prev-icon, .carousel-control-next-icon {
+  filter: invert(1) grayscale(100)
+}
+
+.navbar-nav li {
+    color: #fff!important;
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+div.card {
+    height: 85vh;
+}
+
+div.footer {
+    background-color: white;
+    margin-top: 10px;
+    display: flex;
+    height: auto;
+    padding: 10px 10px 10px 10px;
+}
+
+input.answer{
+    outline:none;
+}
+
+.nav-item button{
+   width: 40px;
+   height: 40px;
+   padding: 0;
+   text-align: center;
+   margin-bottom: 5px;
+}
+
+.nav-item.active button {
+  background-color: #6c757d!important;
+  color: #fff!important;
+}
+
+.list-group {
+      overflow: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+}
+
+.list-group::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+}
