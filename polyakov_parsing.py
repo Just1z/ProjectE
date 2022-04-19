@@ -12,8 +12,10 @@ def random_task(task) -> dict:
     :param task: Номер задания в КИМ от 1 до 27
     :return: dict
     """
-    url = f"https://kpolyakov.spb.ru/school/ege/gen.php?action=viewVar&select={task}&answers=on&varId="
+    select_id = hex(int("1" + "0" * (task - 1), 2))[2:]
+    url = f"https://kpolyakov.spb.ru/school/ege/gen.php?action=viewVar&select={select_id}&answers=on&varId="
     response = requests.get(url)
+
     if response:
         soup = BeautifulSoup(response.text, "lxml")
         tag_td = soup.find("td", {"class": "topicview"})
@@ -35,7 +37,7 @@ def random_task(task) -> dict:
 
 if __name__ == "__main__":
     # пример
-    a = random_task(1)
+    a = random_task(23)
     print(a["id"])
     print(a["answer"])
     print(a["html"])
