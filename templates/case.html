@@ -56,14 +56,16 @@
                     <ul class="nav nav-pills nav-flush flex-column mb-auto text-center indicators">
                         <li class="nav-item active">
                             <button data-bs-target="#carouselExampleDark" data-bs-slide-to="0"
-                                  class="nav-link border bg-white text-secondary active"
-                                  aria-current="true">i</button>
+                                    class="nav-link border bg-white text-secondary active"
+                                    aria-current="true">i
+                            </button>
                         </li>
                         {% for i in range(1, 28) %}
                         <li class="nav-item">
                             <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="{{ i }}"
                                     class="nav-link border bg-white text-secondary"
-                                    aria-current="true">{{ i }}</button>
+                                    aria-current="true">{{ i }}
+                            </button>
                         </li>
                         {% endfor %}
                     </ul>
@@ -71,14 +73,14 @@
             </div>
         </div>
         <div class="col-auto max-height align-items-center" style="position: relative;">
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark"
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselDark"
                     data-bs-slide="prev" style="width: 100%;">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Previous</span>
             </button>
         </div>
         <div class="task col max-height align-items-center">
-            <div id="carouselExampleDark" class="carousel carousel-dark" data-bs-ride="carousel"
+            <div id="carouselDark" class="carousel carousel-dark" data-bs-ride="carousel"
                  data-bs-interval="false">
                 <div class="carousel-inner">
                     <div class="carousel-item active">
@@ -88,15 +90,33 @@
                                 <span>Обозначения для логических связок (операций):</span>
                                 <ul>
                                     <li>отрицание (инверсия, логическое НЕ) обозначается ¬ (например, ¬А);</li>
-                                    <li>конъюнкция (логическое умножение, логическое И) обозначается ∧ (например, А ∧ В) либо & (например, А & В);</li>
-                                    <li>дизъюнкция (логическое сложение, логическое ИЛИ) обозначается ∨ (например, А ∨ В) либо | (например, А | В);</li>
+                                    <li>конъюнкция (логическое умножение, логическое И) обозначается ∧ (например, А ∧ В)
+                                        либо & (например, А & В);
+                                    </li>
+                                    <li>дизъюнкция (логическое сложение, логическое ИЛИ) обозначается ∨ (например, А ∨
+                                        В) либо | (например, А | В);
+                                    </li>
                                     <li>следование (импликация) обозначается → (например, А → В);</li>
-                                    <li>тождество обозначается ≡ (например, A ≡ B); выражение A ≡ B истинно тогда и только тогда, когда значения A и B совпадают (либо они оба истинны, либо они оба ложны);</li>
-                                    <li>символ 1 используется для обозначения истины (истинного высказывания); символ 0 – для обозначения лжи (ложного высказывания).</li>
+                                    <li>тождество обозначается ≡ (например, A ≡ B); выражение A ≡ B истинно тогда и
+                                        только тогда, когда значения A и B совпадают (либо они оба истинны, либо они оба
+                                        ложны);
+                                    </li>
+                                    <li>символ 1 используется для обозначения истины (истинного высказывания); символ 0
+                                        – для обозначения лжи (ложного высказывания).
+                                    </li>
                                 </ul>
-                                <p>Два логических выражения, содержащие переменные, называются равносильными (эквивалентными), если значения этих выражений совпадают при любых значениях переменных. Так, выражения А → В и (¬А) ∨ В равносильны, а А ∨ В и А ∧ В неравносильны (значения выражений разные, например, при А = 1, В = 0).</p>
-                                <p>Приоритеты логических операций: инверсия (отрицание), конъюнкция (логическое умножение), дизъюнкция (логическое сложение), импликация (следование), тождество. Таким образом, ¬А ∧ В ∨ С ∧ D означает то же, что и ((¬А) ∧ В) ∨ (С ∧ D). Возможна запись А ∧ В ∧ С вместо (А ∧ В) ∧ С. То же относится и к дизъюнкции: возможна запись А ∨ В ∨ С вместо (А ∨ В) ∨ С.</p>
-                                <p>Обозначения Мбайт и Кбайт используются в традиционном для информатики смысле – как обозначения единиц измерения, соотношение которых с единицей «байт» выражается степенью двойки.</p>
+                                <p>Два логических выражения, содержащие переменные, называются равносильными
+                                    (эквивалентными), если значения этих выражений совпадают при любых значениях
+                                    переменных. Так, выражения А → В и (¬А) ∨ В равносильны, а А ∨ В и А ∧ В
+                                    неравносильны (значения выражений разные, например, при А = 1, В = 0).</p>
+                                <p>Приоритеты логических операций: инверсия (отрицание), конъюнкция (логическое
+                                    умножение), дизъюнкция (логическое сложение), импликация (следование), тождество.
+                                    Таким образом, ¬А ∧ В ∨ С ∧ D означает то же, что и ((¬А) ∧ В) ∨ (С ∧ D). Возможна
+                                    запись А ∧ В ∧ С вместо (А ∧ В) ∧ С. То же относится и к дизъюнкции: возможна запись
+                                    А ∨ В ∨ С вместо (А ∨ В) ∨ С.</p>
+                                <p>Обозначения Мбайт и Кбайт используются в традиционном для информатики смысле – как
+                                    обозначения единиц измерения, соотношение которых с единицей «байт» выражается
+                                    степенью двойки.</p>
                             </div>
                         </div>
                     </div>
@@ -105,27 +125,26 @@
                         <div class="card">
                             <img class="card-img-top" src="https://dummyimage.com/286x180/ccc/fff" alt="Card image cap">
                             <div class="card-body">
-                                <h5 class="card-title">Task {{ i }}</h5>
-                                <p class="card-text">Some quick example text to build on the card title and make up the
-                                    bulk of the card's content.</p>
+                                <h5 class="card-title"><b>Задание {{ i }}</b></h5>
+                                <p class="card-text">{{ tasks[i] }}</p>
                             </div>
+                        </div>
+                        <div class="footer">
+                            <div class="attach-files me-auto">
+                                <span class="app">files</span>
+                            </div>
+                            <form class="d-flex">
+                                <input class="answer me-2" type="text" aria-label="save-answer">
+                                <button class="btn btn-outline-dark answer" type="submit">Сохранить ответ</button>
+                            </form>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
             </div>
-            <div class="footer">
-                <div class="attach-files me-auto">
-                    <span class="app">files</span>
-                </div>
-                <form class="d-flex">
-                    <input class="answer me-2" type="text" aria-label="save-answer">
-                    <button class="btn btn-outline-dark" type="submit">Сохранить ответ</button>
-                </form>
-            </div>
         </div>
         <div class="col-auto max-height align-items-center">
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark"
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselDark"
                     data-bs-slide="next" style="width: 100%;">
                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Next</span>
