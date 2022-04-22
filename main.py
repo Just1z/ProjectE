@@ -4,6 +4,7 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from data import db_session
 from data.users import User
 from data.variants import Variants
+from data.tasks import Task
 from forms.user import RegisterForm, LoginForm
 
 db_session.global_init("db/kege.db")
@@ -70,7 +71,16 @@ def profile():
 
 @app.route("/case/<int:id>")
 def case(id):
-    return render_template("case.html", title='КЕГЭ', kim_number='-', br_number='2832503195017')
+    session = db_session.create_session()
+    tasks = session.query(Variants).filter(Variants.id == id).first()
+    tasks = tasks.tasks.split(', ')
+    data = []
+    answers = []
+    for i in range(len(tasks)):
+        task = session.query(Task).filter(Task.id == tasks[i]).first()
+        data.append(task.html)
+        answers.append(task.answer)
+    return render_template("case.html", title='КЕГЭ', kim_number='1', br_number='1', tasks=data)
 
 
 @app.route("/generator")

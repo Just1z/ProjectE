@@ -5,6 +5,8 @@ import aiohttp
 import requests
 from bs4 import BeautifulSoup
 from base64 import b64encode
+from data import db_session
+from data.tasks import Task
 
 
 def collect_variant(id):
@@ -35,35 +37,42 @@ def collect_variant(id):
 
 
 def collect_task(url):
+    session = db_session.create_session()
     response = requests.get(url)
 
     if response:
-        tasks = []
-        soup = BeautifulSoup(response.text, "lxml")
-        tags = soup.find_all("td", {"class": "topicview"})
-        tag_answer = soup.find_all("td", {"class": "answer"})
-        for tag_td, answer in zip(tags, tag_answer):
-            answer = answer.find("script").text.strip()
-            answer = re.findall(r"""\(([^\[\]]+)\)""", answer.replace("(", "", 1).strip()[:-2])[0][1:-1]
-            script_lines = tag_td.find("script").text.strip().split("\n")
-            task_id = int(re.search(r"\d+", script_lines[0]).group(0))
-            content = re.findall(r"""\(([^\[\]]+)\)""", script_lines[1].replace("(", "", 1).strip()[:-2])[0][1:-1]
-            if '<img' in content:
-                start = content.index('src="') + 5
-                end = content.index('">') if '">' in content else content.index('"/>')
-                img = 'https://kpolyakov.spb.ru/cms/images/' + content[start:end]
-                content = content[:start - 5] + f'src="data:image/png;base64, {b64encode(requests.get(img).content).decode("utf-8")}' + content[end:]
-            if '<a' in content:
-                pass
-                # start = content.index('href="') + 5
-                # end = content.index('">') if '">' in content else content.index('"/>')
-                # img = 'https://kpolyakov.spb.ru/cms/images/' + content[start:end]
-                # content = content[:start - 5] + f'src="data:image/png;base64, {b64encode(requests.get(img).content).decode("utf-8")}' + content[end:]
-            tasks.append(content)
-
-        return {"html": tasks}
-
-    raise Exception("Невозможно обратиться к сайту Полякова")
+        try:
+            soup = BeautifulSoup(response.text, "lxml")
+            tags = soup.find_all("td", {"class": "topicview"})
+            tag_answer = soup.find_all("td", {"class": "answer"})
+            for tag_td, answer in zip(tags, tag_answer):
+                answer = answer.find("script").text.strip()
+                answer = re.findall(r"""\(([^\[\]]+)\)""", answer.replace("(", "", 1).strip()[:-2])[0][1:-1]
+                script_lines = tag_td.find("script").text.strip().split("\n")
+                task_id = int(re.search(r"\d+", script_lines[0]).group(0))
+                id = session.query(Task).filter(Task.id == task_id).first()
+                content = re.findall(r"""\(([^\[\]]+)\)""", script_lines[1].replace("(", "", 1).strip()[:-2])[0][1:-1]
+                soup = BeautifulSoup(content, 'lxml')
+                if soup.find('img'):
+                    link = 'https://kpolyakov.spb.ru/cms/images/' + soup.find('img')['src']
+                    soup.find('img')['src'] = 'data:image/png;base64,' + b64encode(requests.get(link).content).decode(
+                        "utf-8")
+                if soup.find('a'):
+                    for a in soup.find_all('a'):
+                        a['href'] = 'https://kpolyakov.spb.ru/cms/files/' + a['href']
+                if not id:
+                    task = Task(id=task_id, html=str(soup.find('body')).replace('<body>', '').replace('</body>', ''), answer=answer)
+                    session.add(task)
+                else:
+                    task = session.query(Task).filter(Task.id == task_id).first()
+                    task.html = str(soup.find('body')).replace('<body>', '').replace('</body>', '')
+                    task.answer = answer
+                print(task_id, str(soup.find('body')))
+                session.commit()
+        except Exception as e:
+            print(e)
+            print(task_id, str(soup.find('body')))
+            return
 
 
 def random_task(task) -> dict:
@@ -143,6 +152,7 @@ if __name__ == "__main__":
     # пример
     # a = random_task('10101')
     # print(a)
+    db_session.global_init("db/kege.db")
     links = ['https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=1&cat12=on&cat13=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=2&cat8=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=3&cat169=on',
@@ -169,5 +179,6 @@ if __name__ == "__main__":
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=25&cat157=on&cat158=on&cat159=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=26&cat160=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=27&cat161=on']
-    # for link in links:
-    print(collect_task(links[2])['html'])
+
+    for link in range(len(links)):
+        collect_task(links[link])
