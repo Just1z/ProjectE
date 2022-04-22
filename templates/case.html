@@ -81,7 +81,7 @@
         </div>
         <div class="task col max-height align-items-center">
             <div id="carouselDark" class="carousel carousel-dark" data-bs-ride="carousel"
-                data-bs-interval="false">
+                 data-bs-interval="false">
                 <div class="carousel-inner">
                     <div class="carousel-item active">
                         <div class="card">
@@ -123,10 +123,12 @@
                     {% for i in range(1, 28) %}
                     <div class="carousel-item">
                         <div class="card">
-                            <img class="card-img-top" src="https://dummyimage.com/286x180/ccc/fff" alt="Card image cap">
+<!--                            <img class="card-img-top" src="https://dummyimage.com/286x180/ccc/fff" alt="Card image cap">-->
                             <div class="card-body">
                                 <h5 class="card-title"><b>Задание {{ i }}</b></h5>
-                                <p class="card-text">TODO!!!</p>
+                                <script>
+                                    document.write('{{ tasks[i]|safe }}');
+                                </script>
                             </div>
                         </div>
                         <div class="footer">
@@ -135,7 +137,9 @@
                             </div>
                             <form class="d-flex">
                                 <input class="answer me-2" type="text" aria-label="save-answer" id="{{ i }}">
-                                <button class="btn btn-outline-dark answer" type="submit" id="submit" onclick="save_answer({{i}});">Сохранить ответ</button>
+                                <button class="btn btn-outline-dark answer" type="submit" id="submit"
+                                        onclick="save_answer({{i}});">Сохранить ответ
+                                </button>
                             </form>
                         </div>
                     </div>
@@ -164,6 +168,7 @@
     $(document).on('click', 'ul.indicators li', function(){
         $(this).addClass('active').siblings().removeClass('active')
     })
+
 </script>
 </body>
 </html>
