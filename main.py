@@ -5,7 +5,6 @@ from data import db_session
 from data.users import User
 from data.variants import Variants
 from forms.user import RegisterForm, LoginForm
-from polyakov_parsing import get_task
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
@@ -71,13 +70,6 @@ def profile():
 
 @app.route("/case/<int:id>")
 def case(id):
-    session = db_session.create_session()
-    tasks = session.query(Variants).filter(Variants.id == id).first()
-    tasks = tasks.tasks.split(', ')
-    data = []
-    for i in range(len(tasks)):
-        task = get_task(tasks[i])
-        data.append(task['html'])
     return render_template("case.html", title='КЕГЭ', kim_number='-', br_number='2832503195017')
 
 
