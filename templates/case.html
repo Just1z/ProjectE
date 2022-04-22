@@ -81,7 +81,7 @@
         </div>
         <div class="task col max-height align-items-center">
             <div id="carouselDark" class="carousel carousel-dark" data-bs-ride="carousel"
-                 data-bs-interval="false">
+                data-bs-interval="false">
                 <div class="carousel-inner">
                     <div class="carousel-item active">
                         <div class="card">
@@ -126,7 +126,7 @@
                             <img class="card-img-top" src="https://dummyimage.com/286x180/ccc/fff" alt="Card image cap">
                             <div class="card-body">
                                 <h5 class="card-title"><b>Задание {{ i }}</b></h5>
-                                <p class="card-text">{{ tasks[i] }}</p>
+                                <p class="card-text">TODO!!!</p>
                             </div>
                         </div>
                         <div class="footer">
@@ -134,8 +134,8 @@
                                 <span class="app">files</span>
                             </div>
                             <form class="d-flex">
-                                <input class="answer me-2" type="text" aria-label="save-answer">
-                                <button class="btn btn-outline-dark answer" type="submit">Сохранить ответ</button>
+                                <input class="answer me-2" type="text" aria-label="save-answer" id="{{ i }}">
+                                <button class="btn btn-outline-dark answer" type="submit" id="submit" onclick="save_answer({{i}});">Сохранить ответ</button>
                             </form>
                         </div>
                     </div>

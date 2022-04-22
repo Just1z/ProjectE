@@ -1,3 +1,17 @@
 div > a:hover {
   text-decoration:none;
 }
+table {
+    border-collapse: separate;
+    border-spacing: 4px 4px;
+    empty-cells: hide;
+    width: 400
+}
+th, td {
+   background: rgba(155, 155, 200, .1);
+   width: 11%;
+}
+td:hover {
+    color: #6699ff;
+    background: rgba(100, 100, 200, .1);
+}
