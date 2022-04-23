@@ -130,7 +130,7 @@
                             <div class="card-body">
                                 <h5 class="card-title"><b>Задание {{ i }}</b></h5>
                                 <script>
-                                    document.write('{{ tasks[i]|safe }}');
+                                    document.write('{{ tasks[i-1]|safe }}');
                                     add_number(numbers[{{i-1}}], {{i-1}});
                                 </script>
                             </div>
