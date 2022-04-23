@@ -6,125 +6,31 @@
         <p>Вы можете построить свой вариант, указав какие задания необходимо включить в вариант, поставив галочку напротив номера
             задания.</p>
         <p>
-            <button type="button" class="btn btn-secondary" onclick="select_all">Выбрать все задания</button>
-            <button type="button" class="btn btn-secondary" onclick="deselect_all">Убрать все задания</button>
+            <button type="button" class="btn btn-secondary" onclick="select_all();">Выбрать все задания</button>
+            <button type="button" class="btn btn-secondary" onclick="select_all(deselect=true);">Убрать все задания</button>
         </p>
         <table class="tasks" align="center">
             <tbody>
-            <tr>
-                <td>
-                    <input type="checkbox" id="1" checked="checked">1
-                    <input type="text" name="task_1" id="task_1" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="2" checked="checked" value="№2">2
-                    <input type="text" name="task_2" id="task_2" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="3" checked="checked" value="№3">3
-                    <input type="text" name="task_3" id="task_3" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="4" checked="checked" value="№4">4
-                    <input type="text" name="task_4" id="task_4" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="5" checked="checked" value="№5">5
-                    <input type="text" name="task_5" id="task_5" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="6" checked="checked" value="№6">6
-                    <input type="text" name="task_6" id="task_6" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="7" checked="checked" value="№7">7
-                    <input type="text" name="task_7" id="task_7" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="8" checked="checked" value="№8">8
-                    <input type="text" name="task_8" id="task_8" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="9" checked="checked" value="№9">9
-                    <input type="text" name="task_9" id="task_9" size="4">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <input type="checkbox" id="10" checked="checked">10
-                    <input type="text" name="task_10" id="task_10" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="11" checked="checked" value="№11">11
-                    <input type="text" name="task_11" id="task_11" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="12" checked="checked" value="№12">12
-                    <input type="text" name="task_12" id="task_12" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="13" checked="checked" value="№13">13
-                    <input type="text" name="task_13" id="task_13" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="14" checked="checked" value="№14">14
-                    <input type="text" name="task_14" id="task_14" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="15" checked="checked" value="№15">15
-                    <input type="text" name="task_15" id="task_15" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="16" checked="checked" value="№16">16
-                    <input type="text" name="task_16" id="task_16" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="17" checked="checked" value="№17">17
-                    <input type="text" name="task_17" id="task_17" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="18" checked="checked" value="№18">18
-                    <input type="text" name="task_18" id="task_18" size="4">
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <input type="checkbox" id="19" checked="checked">19
-                    <input type="text" name="task_19" id="task_19" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="20" checked="checked" value="№20">20
-                    <input type="text" name="task_20" id="task_20" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="21" checked="checked" value="№21">21
-                    <input type="text" name="task_21" id="task_21" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="22" checked="checked" value="№22">22
-                    <input type="text" name="task_22" id="task_22" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="23" checked="checked" value="№23">23
-                    <input type="text" name="task_5" id="task_23" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="24" checked="checked" value="№24">24
-                    <input type="text" name="task_24" id="task_24" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="25" checked="checked" value="№25">25
-                    <input type="text" name="task_25" id="task_25" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="26" checked="checked" value="№26">26
-                    <input type="text" name="task_26" id="task_26" size="4">
-                </td>
-                <td>
-                    <input type="checkbox" id="27" checked="checked" value="№27">27
-                    <input type="text" name="task_27" id="task_27" size="4">
-                </td>
-            </tr>
+                <script>
+                    let id = 1;
+                    for (let row = 0; row < 3; row++) {
+                        document.write(`<tr>`);
+                        for (let i = 0; i < 9; i++) {
+                            document.write(`
+                                <td style="width: 120px;">
+                                    <input type="checkbox" name="task_checkbox" 
+                                        id="cbx_${id}" checked="checked" onclick="select_task(${id});" 
+                                        style="position:relative; left:3%; top:12px; float:left;">
+                                    <p style="position:relative;display:inline-block; top:5px">${id}</p>
+                                    <input type="text" name="task_input" value="1"
+                                        id="inp_${id}" size="4" onkeyup="onInputChange(${id});"
+                                        style="position:relative; right:3%; top:5px; float:right; width:70px;">
+                                </td>`);
+                            id++;
+                        }
+                        document.write(`</tr>`);
+                    }
+                </script>
             </tbody>
         </table>
         <p>

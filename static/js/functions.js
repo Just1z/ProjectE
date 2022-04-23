@@ -1,3 +1,5 @@
+function isNumber(n) { return !isNaN(parseInt(n)) && !isNaN(n - 0) }
+
 function contador() {
     var hr = localStorage.getItem("hr");
     var mm = localStorage.getItem("mm");
@@ -83,4 +85,40 @@ let make_table = (right_answers) => {
         <td style="text-align: center; font-weight: bold;">${right_answers[i]}</th>
         <td style="text-align: center; font-weight: bold; background-color: ${color}">${answers[i]}</th>`);
     }
+}
+
+let select_all = (deselect = false) => {
+    var checkboxes = document.getElementsByName("task_checkbox");
+    var inputs = document.getElementsByName("task_input");
+    if (deselect) {
+        checkboxes.forEach(cb => cb.checked = false);
+        inputs.forEach(inp => inp.value = "0");
+    } else {
+        checkboxes.forEach(cb => cb.checked = true);
+        inputs.forEach(inp => inp.value = "1");
+    }
+}
+
+let select_task = (id) => {
+    var checkbox = document.getElementById(`cbx_${id}`);
+    var input = document.getElementById(`inp_${id}`);
+    checkbox.checked ? input.value = "1" : input.value = "0";
+}
+
+let onInputChange = (id) => {
+    var input = document.getElementById(`inp_${id}`);
+    var checkbox = document.getElementById(`cbx_${id}`);
+    if (!isNumber(input.value)) {
+        input.value = input.value.slice(0, -1);
+    } 
+    num = parseInt(input.value);
+    if (num <= 0) {
+        num = "0";
+        checkbox.checked = false;
+    } else {checkbox.checked = true;}
+    if (!num) {checkbox.checked = false; num = "0"}
+    if (num > 20) {
+        num = "20";
+    }
+    input.value = num;
 }
