@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block head%}
+    <script src="{{ url_for('static', filename='js/functions.js') }}" type="text/javascript"></script>
+{% endblock %}
+
+{% block content %}
+<div class="starter-template text-center py-5 px-3" style="margin-top: 20px;">
+    <h2>Результаты</h2>
+    <table>
+        <tr>
+            <th style="text-align: center; font-weight: bold;">Номер задания</th>
+            <th style="text-align: center; font-weight: bold;">Правильный ответ</th>
+            <th style="text-align: center; font-weight: bold;">Ваш ответ</th>
+        </tr>
+        {% for right_answer in right_answers %}
+        <tr class="user_results">
+            <td style="text-align: center;">{{loop.index}}</td>
+            <td style="text-align: center;">{{right_answer}}</td>
+            <script>
+                var table = document.getElementsByClassName("user_results")[{{loop.index0}}];
+                var answers = localStorage.getItem('answers');
+                answers = answers.split(",");
+                answer = answers[{{loop.index0}}];
+                console.log(answer);
+                var color = "";
+                if (answer.length > 0) {
+                    if (answer == `{{right_answer}}`) {
+                        color = "#00FF7F";
+                    } else {
+                        color = "#FF4940";
+                    };
+                } else {
+                    color = "#696969";
+                    answer = "Нет ответа"
+                }
+                document.write(`<td style="text-align: center; background-color: ${color}">${answer}</td>`);
+            </script>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+{% endblock %}

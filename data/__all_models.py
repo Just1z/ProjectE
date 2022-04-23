@@ -1,1 +1,1 @@
-from . import users, tasks, variants
+from . import users, tasks, variants, test_sessions

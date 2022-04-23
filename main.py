@@ -1,15 +1,18 @@
 import os
-from flask import Flask, render_template, redirect, url_for
+import functions
+from random import choice
+from flask import Flask, render_template, redirect, url_for, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data import db_session
 from data.users import User
 from data.variants import Variants
 from data.tasks import Task
+from data.test_sessions import Test_session
 from forms.user import RegisterForm, LoginForm
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
+app.config['SECRET_KEY'] = 'ocPMh2NRBFmFfwgV9t2SMarBX4JzNd'
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -74,13 +77,32 @@ def case(id):
     session = db_session.create_session()
     tasks = session.query(Variants).filter(Variants.id == id).first()
     tasks = tasks.tasks.split(', ')
-    data = []
+    data = {"tasks": [], "kim_number": "1", "br_number": 1, "title": "КЕГЭ"}
     answers = []
     for i in range(len(tasks)):
         task = session.query(Task).filter(Task.id == tasks[i]).first()
-        data.append(task.html)
+        data["tasks"].append(task.html)
         answers.append(task.answer)
-    return render_template("case.html", title='КЕГЭ', kim_number='1', br_number='1', tasks=data)
+    # Заносим сессию в базу данных
+    test_session_code = functions.generate_code() # Код сессии
+    # Вероятность получения уже существующего кода -> 0
+    test_session = Test_session(id=test_session_code, answers=",".join(answers))
+    if current_user.is_authenticated:
+        test_session.setUser(current_user.id)
+    session.add(test_session)
+    session.commit()
+    data["code"] = test_session_code
+    return render_template("case.html", **data)
+
+
+@app.route("/result/", methods=["GET"])
+def result():
+    code = request.args.get('sess')
+    session = db_session.create_session()
+    right_answers = session.query(Test_session).filter(
+        Test_session.id == code).first().answers.split(",")
+    data = {"right_answers": right_answers, "title": "Результаты"}
+    return render_template("result.html", **data)
 
 
 @app.route("/generator")
