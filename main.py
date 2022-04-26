@@ -124,6 +124,11 @@ def generator():
     return render_template("generator.html", title="Генератор")
 
 
+@app.route("/task_database")
+def task_database():
+    return render_template("task_database.html", title="База заданий")
+
+
 @app.route("/")
 @app.route("/index")
 def index():
