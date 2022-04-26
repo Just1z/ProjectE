@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, redirect, request
 from flask_login import LoginManager, login_user, login_required, \
     logout_user, current_user
-import functions
+from functions import *
 from data import db_session
 from data.users import User
 from data.variants import Variants
@@ -96,7 +96,7 @@ def case(v_id):
             data["tasks"].append(text)
             answers.append(ans)
     # Заносим сессию в базу данных
-    test_session_code = functions.generate_code() # Код сессии
+    test_session_code = generate_code()  # Код сессии
     # Вероятность получения уже существующего кода -> 0
     test_session = Test_session(id=test_session_code, answers=",".join(answers))
     if current_user.is_authenticated:
@@ -113,7 +113,9 @@ def result():
     session = db_session.create_session()
     right_answers = session.query(Test_session).filter(
         Test_session.id == code).first().answers.split(",")
-    data = {"right_answers": right_answers, "title": "Результаты"}
+    primary_points = 29
+    data = {"right_answers": right_answers, "title": "Результаты",
+            "primary_points": primary_points, "secondary_points": to_100(primary_points)}
     return render_template("result.html", **data)
 
 
