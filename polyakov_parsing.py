@@ -51,7 +51,8 @@ def collect_task(url):
                 script_lines = tag_td.find("script").text.strip().split("\n")
                 task_id = int(re.search(r"\d+", script_lines[0]).group(0))
                 id = session.query(Task).filter(Task.id == task_id).first()
-                content = re.findall(r"""\(([^\[\]]+)\)""", script_lines[1].replace("(", "", 1).strip()[:-2])[0][1:-1]
+                # content = re.findall(r"""\(([^\[\]]+)\)""", script_lines[1].replace("(", "", 1).strip()[:-2])
+                content = script_lines[1].replace('document.write( changeImageFilePath(', '').replace('\'', '').strip()[:-4]
                 soup = BeautifulSoup(content, 'lxml')
                 if soup.find('img'):
                     link = 'https://kpolyakov.spb.ru/cms/images/' + soup.find('img')['src']
@@ -167,7 +168,6 @@ if __name__ == "__main__":
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=12&cat55=on&cat56=on&cat57=on&cat58=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=13&cat59=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=14&cat60=on&cat61=on&cat62=on',
-             'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=14&cat60=on&cat61=on&cat62=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=15&cat67=on&cat68=on&cat69=on&cat70=on&cat123=on&cat167=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=16&cat44=on&cat45=on&cat46=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=17&cat168=on&cat170=on',
@@ -180,5 +180,6 @@ if __name__ == "__main__":
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=26&cat160=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=27&cat161=on']
 
-    for link in range(len(links)):
-        collect_task(links[link])
+    # for link in range(len(links)):
+    #     collect_task(links[link])
+    collect_task(links[14])

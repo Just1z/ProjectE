@@ -1,4 +1,5 @@
 import sqlalchemy
+from sqlalchemy import orm
 from .db_session import SqlAlchemyBase
 
 
@@ -9,7 +10,7 @@ class Test_session(SqlAlchemyBase):
     user_id = sqlalchemy.Column(sqlalchemy.Integer, 
         sqlalchemy.ForeignKey("users.id"), nullable=True)
     answers = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    user = sqlalchemy.orm.relation('User')
+    user = orm.relation('User')
 
     def setUser(self, user_id):
         self.user = user_id

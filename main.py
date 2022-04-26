@@ -82,14 +82,25 @@ def case(v_id):
     answers = []
     for t_id in tasks:
         task = session.query(Task).filter(Task.id == t_id).first()
-        data["tasks"].append(task.html)
-        answers.append(task.answer)
+        text = task.html
+        ans = task.answer
+        if 'Вопрос 1.' in text:
+            ans = [i[3:] for i in ans.split('<br/>')]
+            ind2 = text.index('Вопрос 2')
+            ind3 = text.index('Вопрос 3')
+            data["tasks"].append(text[:ind2].replace('Вопрос 1.', ''))
+            data["tasks"].append(text[ind2:ind3].replace('Вопрос 2.', ''))
+            data["tasks"].append(text[ind3:].replace('Вопрос 3.', ''))
+            answers.extend(ans)
+        else:
+            data["tasks"].append(text)
+            answers.append(ans)
     # Заносим сессию в базу данных
     test_session_code = functions.generate_code() # Код сессии
     # Вероятность получения уже существующего кода -> 0
     test_session = Test_session(id=test_session_code, answers=",".join(answers))
     if current_user.is_authenticated:
-        test_session.setUser(current_user.id)
+        test_session.setUser(current_user)
     session.add(test_session)
     session.commit()
     data["code"] = test_session_code
