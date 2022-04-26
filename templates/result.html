@@ -14,27 +14,30 @@
             <td style="text-align: center;">{{loop.index}}</td>
             <td style="text-align: center;">{{right_answer}}</td>
             <script>
-                var table = document.getElementsByClassName("user_results")[{{loop.index0}}];
                 var answers = localStorage.getItem('answers');
-                answers = answers.split(",");
-                answer = answers[{{loop.index0}}];
-                console.log(answer);
-                var color = "";
-                if (answer.length > 0) {
-                    if (answer == `{{right_answer}}`) {
-                        color = "#00FF7F";
-                    } else {
-                        color = "#FF4940";
-                    };
+                if (!answers) {
+                    document.write(`<td style="text-align: center; background-color: #696969">Нет ответа</td>`);
                 } else {
-                    color = "#696969";
-                    answer = "Нет ответа"
+                    var answer = answers.split(",")[{{loop.index0}}];
+                    var color = "";
+                    if (answer.length) {
+                        if (answer == `{{right_answer}}`) {
+                            color = "#00FF7F";
+                        } else {
+                            color = "#FF4940";
+                        };
+                    } else {
+                        color = "#696969";
+                        answer = "Нет ответа";
+                    }
+                    document.write(`<td style="text-align: center; background-color: ${color}">${answer}</td>`);
                 }
-                document.write(`<td style="text-align: center; background-color: ${color}">${answer}</td>`);
             </script>
         </tr>
         {% endfor %}
     </table>
-
+    <script>
+        localStorage.removeItem('answers');
+    </script>
 </div>
 {% endblock %}

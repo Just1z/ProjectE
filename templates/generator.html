@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/generator.css')}}"/>
+{% endblock %}
+
 {% block content %}
 <div class="starter-template text-center py-5">
     <form>
@@ -17,14 +22,12 @@
                         document.write(`<tr>`);
                         for (let i = 0; i < 9; i++) {
                             document.write(`
-                                <td style="width: 120px;">
+                                <td>
                                     <input type="checkbox" name="task_checkbox" 
-                                        id="cbx_${id}" checked="checked" onclick="select_task(${id});" 
-                                        style="position:relative; left:3%; top:12px; float:left;">
-                                    <p style="position:relative;display:inline-block; top:5px">${id}</p>
+                                        id="cbx_${id}" checked="checked" onclick="select_task(${id});">
+                                    <p name="task_number">${id}</p>
                                     <input type="text" name="task_input" value="1"
-                                        id="inp_${id}" size="4" onkeyup="onInputChange(${id});"
-                                        style="position:relative; right:3%; top:5px; float:right; width:70px;">
+                                        id="inp_${id}" size="4" onkeyup="onInputChange(${id});">
                                 </td>`);
                             id++;
                         }

@@ -1,8 +1,8 @@
 import os
+from flask import Flask, render_template, redirect, request
+from flask_login import LoginManager, login_user, login_required, \
+    logout_user, current_user
 import functions
-from random import choice
-from flask import Flask, render_template, redirect, url_for, request
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data import db_session
 from data.users import User
 from data.variants import Variants
@@ -12,7 +12,7 @@ from forms.user import RegisterForm, LoginForm
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'ocPMh2NRBFmFfwgV9t2SMarBX4JzNd'
+app.config["SECRET_KEY"] = "ocPMh2NRBFmFfwgV9t2SMarBX4JzNd"
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -28,7 +28,8 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
-            return render_template('register.html', title='Регистрация', form=form, message="Пароли не совпадают")
+            return render_template(
+                'register.html', title='Регистрация', form=form, message="Пароли не совпадают")
         session = db_session.create_session()
         if session.query(User).filter(User.email == form.email.data).first():
             return render_template('register.html', title='Регистрация', form=form,
@@ -72,15 +73,15 @@ def profile():
     return render_template("profile.html", title='КЕГЭ')
 
 
-@app.route("/case/<int:id>")
-def case(id):
+@app.route("/case/<int:v_id>")
+def case(v_id):
     session = db_session.create_session()
-    tasks = session.query(Variants).filter(Variants.id == id).first()
+    tasks = session.query(Variants).filter(Variants.id == v_id).first()
     tasks = tasks.tasks.split(', ')
     data = {"tasks": [], "kim_number": "1", "br_number": 1, "title": "КЕГЭ"}
     answers = []
-    for i in range(len(tasks)):
-        task = session.query(Task).filter(Task.id == tasks[i]).first()
+    for t_id in tasks:
+        task = session.query(Task).filter(Task.id == t_id).first()
         data["tasks"].append(task.html)
         answers.append(task.answer)
     # Заносим сессию в базу данных
@@ -97,7 +98,7 @@ def case(id):
 
 @app.route("/result/", methods=["GET"])
 def result():
-    code = request.args.get('sess')
+    code = request.args.get("sess")
     session = db_session.create_session()
     right_answers = session.query(Test_session).filter(
         Test_session.id == code).first().answers.split(",")
@@ -116,6 +117,6 @@ def index():
     return render_template("index.html", title='КЕГЭ')
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

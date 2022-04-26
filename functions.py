@@ -1,10 +1,9 @@
+""" В этом файле находятся функции, используемые в main.py"""
 from random import choice
 
-all_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+ALL_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 
 def generate_code():
-    code = ""
-    for i in range(25):
-        code += choice(all_chars)
-    return code
+    """ Возвращает случайную строку из 25 символов"""
+    return "".join([choice(ALL_CHARS) for i in range(25)])

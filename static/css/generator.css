@@ -1,0 +1,23 @@
+td {
+    width: 120px;
+}
+
+input[name="task_checkbox" ] {
+    position:relative; 
+    left:3%; 
+    top:12px; 
+    float:left;
+}
+
+p[name="task_number"] {
+    position:relative;
+    display:inline-block; 
+    top:5px
+}
+
+input[name="task_input"] {
+    position:relative;
+    right:3%; top:5px;
+    float:right;
+    width:70px;
+}
