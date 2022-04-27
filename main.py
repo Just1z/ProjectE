@@ -73,12 +73,12 @@ def profile():
     return render_template("profile.html", title='КЕГЭ')
 
 
-@app.route("/case/<int:v_id>")
-def case(v_id):
+@app.route("/case/<int:id>")
+def case(id):
     session = db_session.create_session()
-    tasks = session.query(Variants).filter(Variants.id == v_id).first()
+    tasks = session.query(Variants).filter(Variants.id == id).first()
+    data = {"tasks": [], "kim_number": "1", "br_number": 1, "title": "КЕГЭ", "time": tasks.time}
     tasks = tasks.tasks.split(', ')
-    data = {"tasks": [], "kim_number": "1", "br_number": 1, "title": "КЕГЭ"}
     answers = []
     for t_id in tasks:
         task = session.query(Task).filter(Task.id == t_id).first()

@@ -1,56 +1,103 @@
 function isNumber(n) { return !isNaN(parseInt(n)) && !isNaN(n - 0) }
 
-function contador() {
+var interval = ''
+
+function contador(time) {
     var hr = localStorage.getItem("hr");
     var mm = localStorage.getItem("mm");
     var ss = localStorage.getItem("ss");
     if (!hr || !mm || !ss) {
-        hr = "3";
-        mm = "54";
-        ss = "59";
+        hr = Math.floor(time / 3600).toString();
+        mm = Math.floor(time / 60).toString();
+        ss = (time % 60).toString();
         localStorage.setItem("hr", hr);
         localStorage.setItem("mm", mm);
         localStorage.setItem("ss", ss);
+        localStorage.setItem("answers", ["", "", "", "", "", "", "", "", "", "", "", "",
+            "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""]);
     }
-    var interval = setInterval(function () {
-        if (hr == 0 && mm == 0 && ss == 0) {
-            clearInterval(interval);
-
-        }
+    interval = setInterval(function() {
         ss--;
         if (ss == 0) {
-            ss = 59;
-            mm--;
-            if (mm == 0) {
-                mm = 59;
-                hr--;
-            }
-            if (hr == 0) {
-                hr = 24;
+            if (hr <= 0 && mm <= 0) {
+               clearInterval(interval);
+               window.location.href = document.getElementById('finishExam').href
+            } else {
+                ss = 59;
+                mm--;
+                if (mm == 0) {
+                   mm = 59;
+                   hr--;
+                }
             }
         }
-        if (hr.toString().length < 2) hr = "0" + hr;
-        if (mm.toString().length < 2) mm = "0" + mm;
-        if (ss.toString().length < 2) ss = "0" + ss;
+        if (ss <= 0) {
+            clearInterval(interval);
+            window.location.href = document.getElementById('finishExam').href
+        }
+
+        if (hr.toString().length < 2) {
+            hr = "0" + hr;
+        }
+        if (mm.toString().length < 2) {
+            mm = "0" + mm;
+        }
+        if (ss.toString().length < 2) {
+            ss = "0" + ss;
+        }
         $(".time").html('<span class="hours">' + hr + '</span>:<span class="minutes">' + mm + '</span>');
         localStorage.setItem("hr", hr);
         localStorage.setItem("mm", mm);
-        localStorage.setItem("ss", ss);}, 1000);
+        localStorage.setItem("ss", ss);}, 1000)
 }
-window.onload = contador;
+
+function changeActiveElementNext() {
+    var element = document.querySelectorAll('ul > li.active');
+    var element_next = element.nextSibling;
+}
 
 
 let save_answer = (number) => {
     var answer = document.getElementsByClassName('answer me-2')[number-1].value;
     var answers = localStorage.getItem('answers');
-    if (!answers) {
-        answers = ["", "", "", "", "", "", "", "", "", "", "", "", 
+    answers = answers.split(",")
+    answers[number-1] = answer;
+    console.log(answers)
+    localStorage.setItem("answers", answers);
+}
+
+let add_number = (number, index) => {
+    var numbers = localStorage.getItem("numbers");
+    if (!numbers) {
+        numbers = ["", "", "", "", "", "", "", "", "", "", "", "", 
             "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
     } else {
-        answers = answers.split(",")
+        numbers = numbers.split(",")
     }
-    answers[number-1] = answer;
-    localStorage.setItem("answers", answers);
+    numbers[index] = number
+    localStorage.setItem("numbers", numbers);
+}
+
+let make_table = (right_answers) => {
+    var table = document.getElementsByClassName("user_results")[0];
+    var answers = localStorage.getItem('answers');
+    answers = answers.split(",");
+    for (let i = 0; i < rows; i++) {
+        var color = "";
+        if (answers[i]) {
+            if (answers[i] == right_answers[i]) {
+                color = "#00FF7F";
+            } else {
+                color = "#FF4940";
+            };
+        } else {
+            color = "#282828";
+        }
+        table.insertAdjacentHTML("beforeend", 
+        `<td style="text-align: center; font-weight: bold;">${i + 1}</th>
+        <td style="text-align: center; font-weight: bold;">${right_answers[i]}</th>
+        <td style="text-align: center; font-weight: bold; background-color: ${color}">${answers[i]}</th>`);
+    }
 }
 
 let select_all = (deselect = false) => {
@@ -87,4 +134,16 @@ let onInputChange = (id) => {
         num = "20";
     }
     input.value = num;
+}
+
+
+function showAlert() {
+    if (confirm("Вы уверены, что хотите завершить экзамен?")) {
+        clearInterval(interval);
+        localStorage.setItem("hr", 0);
+        localStorage.setItem("mm", 0);
+        localStorage.setItem("ss", 0);
+        window.location.href = document.getElementById('finishExam').href
+    }
+    return false
 }
