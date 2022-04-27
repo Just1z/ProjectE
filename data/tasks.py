@@ -8,3 +8,4 @@ class Task(SqlAlchemyBase):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
     html = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     answer = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    files = sqlalchemy.Column(sqlalchemy.String, nullable=True)

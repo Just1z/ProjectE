@@ -7,9 +7,9 @@ function contador(time) {
     var mm = localStorage.getItem("mm");
     var ss = localStorage.getItem("ss");
     if (!hr || !mm || !ss) {
-        hr = Math.floor(time / 3600).toString();
-        mm = Math.floor(time / 60).toString();
-        ss = (time % 60).toString();
+        hr = Math.floor(time / 3600);
+        mm = Math.floor(time % 3600 / 60);
+        ss = (time % 60);
         localStorage.setItem("hr", hr);
         localStorage.setItem("mm", mm);
         localStorage.setItem("ss", ss);
@@ -18,10 +18,12 @@ function contador(time) {
     }
     interval = setInterval(function() {
         ss--;
-        if (ss == 0) {
+        if (ss <= 0) {
             if (hr <= 0 && mm <= 0) {
-               clearInterval(interval);
-               window.location.href = document.getElementById('finishExam').href
+                localStorage.setItem("hr", 0);
+                localStorage.setItem("mm", 0);
+                localStorage.setItem("ss", 0);
+                window.location.href = document.getElementById('finishExam').href;
             } else {
                 ss = 59;
                 mm--;
@@ -31,11 +33,6 @@ function contador(time) {
                 }
             }
         }
-        if (ss <= 0) {
-            clearInterval(interval);
-            window.location.href = document.getElementById('finishExam').href
-        }
-
         if (hr.toString().length < 2) {
             hr = "0" + hr;
         }
@@ -139,10 +136,10 @@ let onInputChange = (id) => {
 
 function showAlert() {
     if (confirm("Вы уверены, что хотите завершить экзамен?")) {
-        clearInterval(interval);
         localStorage.setItem("hr", 0);
         localStorage.setItem("mm", 0);
         localStorage.setItem("ss", 0);
+        clearInterval(interval);
         window.location.href = document.getElementById('finishExam').href
     }
     return false

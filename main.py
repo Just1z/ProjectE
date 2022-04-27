@@ -79,11 +79,13 @@ def case(id):
     tasks = session.query(Variants).filter(Variants.id == id).first()
     data = {"tasks": [], "kim_number": "1", "br_number": 1, "title": "КЕГЭ", "time": tasks.time}
     tasks = tasks.tasks.split(', ')
+    files = []
     answers = []
     for t_id in tasks:
         task = session.query(Task).filter(Task.id == t_id).first()
         text = task.html
         ans = task.answer
+        file = task.files
         if 'Вопрос 1.' in text:
             ans = [i[3:] for i in ans.split('<br/>')]
             ind2 = text.index('Вопрос 2')
@@ -95,6 +97,7 @@ def case(id):
         else:
             data["tasks"].append(text)
             answers.append(ans)
+        files.append(file)
     # Заносим сессию в базу данных
     test_session_code = generate_code()  # Код сессии
     # Вероятность получения уже существующего кода -> 0
@@ -103,6 +106,7 @@ def case(id):
         test_session.setUser(current_user)
     session.add(test_session)
     session.commit()
+    data["files"] = files
     data["code"] = test_session_code
     return render_template("case.html", **data)
 

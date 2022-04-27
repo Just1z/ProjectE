@@ -48,10 +48,10 @@ def collect_task(url):
             for tag_td, answer in zip(tags, tag_answer):
                 answer = answer.find("script").text.strip()
                 answer = re.findall(r"""\(([^\[\]]+)\)""", answer.replace("(", "", 1).strip()[:-2])[0][1:-1]
+                files = []
                 script_lines = tag_td.find("script").text.strip().split("\n")
                 task_id = int(re.search(r"\d+", script_lines[0]).group(0))
                 id = session.query(Task).filter(Task.id == task_id).first()
-                # content = re.findall(r"""\(([^\[\]]+)\)""", script_lines[1].replace("(", "", 1).strip()[:-2])
                 content = script_lines[1].replace('document.write( changeImageFilePath(', '').replace('\'', '').strip()[:-4]
                 soup = BeautifulSoup(content, 'lxml')
                 if soup.find('img'):
@@ -60,14 +60,17 @@ def collect_task(url):
                         "utf-8")
                 if soup.find('a'):
                     for a in soup.find_all('a'):
-                        a['href'] = 'https://kpolyakov.spb.ru/cms/files/' + a['href']
+                        if not a['href'].startswith('htt'):
+                            a['href'] = 'https://kpolyakov.spb.ru/cms/files/' + a['href']
+                            files.append(a)
                 if not id:
-                    task = Task(id=task_id, html=str(soup.find('body')).replace('<body>', '').replace('</body>', ''), answer=answer)
+                    task = Task(id=task_id, html=str(soup.find('body')).replace('<body>', '').replace('</body>', ''), answer=answer, files=' '.join(map(str, files)))
                     session.add(task)
                 else:
                     task = session.query(Task).filter(Task.id == task_id).first()
                     task.html = str(soup.find('body')).replace('<body>', '').replace('</body>', '')
                     task.answer = answer
+                    task.files = ' '.join(map(str, files))
                 print(task_id, str(soup.find('body')))
                 session.commit()
         except Exception as e:
@@ -180,6 +183,6 @@ if __name__ == "__main__":
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=26&cat160=on',
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=27&cat161=on']
 
-    # for link in range(len(links)):
-    #     collect_task(links[link])
-    collect_task(links[14])
+    for link in range(len(links)):
+        collect_task(links[link])
+    # collect_task(links[14])
