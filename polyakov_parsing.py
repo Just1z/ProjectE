@@ -185,4 +185,3 @@ if __name__ == "__main__":
 
     for link in range(len(links)):
         collect_task(links[link])
-    # collect_task(links[14])
