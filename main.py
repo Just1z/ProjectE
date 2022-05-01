@@ -2,17 +2,17 @@ import os
 from flask import Flask, render_template, redirect, request
 from flask_login import LoginManager, login_user, login_required, \
     logout_user, current_user
-from functions import *
+from functions import generate_code, to_100
 from data import db_session
 from data.users import User
 from data.variants import Variants
 from data.tasks import Task
-from data.test_sessions import Test_session
+from data.test_sessions import TestSession
 from forms.user import RegisterForm, LoginForm
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "ocPMh2NRBFmFfwgV9t2SMarBX4JzNd"
+app.config["SECRET_KEY"] = "WVJsu7b3pPCzz5EgY8IWTIynZ45XNEAZYULN2mLW"
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -73,10 +73,10 @@ def profile():
     return render_template("profile.html", title='КЕГЭ')
 
 
-@app.route("/case/<int:id>")
-def case(id):
+@app.route("/case/<int:case_id>")
+def case(case_id):
     session = db_session.create_session()
-    tasks = session.query(Variants).filter(Variants.id == id).first()
+    tasks = session.query(Variants).filter(Variants.id == case_id).first()
     data = {"tasks": [], "kim_number": "1", "br_number": 1, "title": "КЕГЭ", "time": tasks.time}
     tasks = tasks.tasks.split(', ')
     files = []
@@ -101,9 +101,9 @@ def case(id):
     # Заносим сессию в базу данных
     test_session_code = generate_code()  # Код сессии
     # Вероятность получения уже существующего кода -> 0
-    test_session = Test_session(id=test_session_code, answers=",".join(answers))
+    test_session = TestSession(id=test_session_code, answers=",".join(answers))
     if current_user.is_authenticated:
-        test_session.setUser(current_user)
+        test_session.setUser(current_user.id)
     session.add(test_session)
     session.commit()
     data["files"] = files
@@ -115,8 +115,8 @@ def case(id):
 def result():
     code = request.args.get("sess")
     session = db_session.create_session()
-    right_answers = session.query(Test_session).filter(
-        Test_session.id == code).first().answers.split(",")
+    right_answers = session.query(TestSession).filter(
+        TestSession.id == code).first().answers.split(",")
     primary_points = 29
     data = {"right_answers": right_answers, "title": "Результаты",
             "primary_points": primary_points, "secondary_points": to_100(primary_points)}
@@ -137,6 +137,11 @@ def task_database():
 @app.route("/index")
 def index():
     return render_template("index.html", title='КЕГЭ')
+
+
+@app.errorhandler(404)
+def not_found(error):
+    return render_template("not_found.html", title="Страница не найдена")
 
 
 if __name__ == "__main__":

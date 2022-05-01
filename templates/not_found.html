@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/404.css')}}"/>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="text" style="--texts: 3;">
+        <span style="--index: 0;">Ошибка 404</span>
+        <span style="--index: 1;">Ошибка 404</span>
+        <span style="--index: 2;">Ошибка 404</span>
+    </div>
+        <span class="right">Страница не найдена :/</span>
+</div>
+{% endblock %}

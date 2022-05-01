@@ -63,40 +63,6 @@ let save_answer = (number) => {
     localStorage.setItem("answers", answers);
 }
 
-let add_number = (number, index) => {
-    var numbers = localStorage.getItem("numbers");
-    if (!numbers) {
-        numbers = ["", "", "", "", "", "", "", "", "", "", "", "", 
-            "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
-    } else {
-        numbers = numbers.split(",")
-    }
-    numbers[index] = number
-    localStorage.setItem("numbers", numbers);
-}
-
-let make_table = (right_answers) => {
-    var table = document.getElementsByClassName("user_results")[0];
-    var answers = localStorage.getItem('answers');
-    answers = answers.split(",");
-    for (let i = 0; i < rows; i++) {
-        var color = "";
-        if (answers[i]) {
-            if (answers[i] == right_answers[i]) {
-                color = "#00FF7F";
-            } else {
-                color = "#FF4940";
-            };
-        } else {
-            color = "#282828";
-        }
-        table.insertAdjacentHTML("beforeend", 
-        `<td style="text-align: center; font-weight: bold;">${i + 1}</th>
-        <td style="text-align: center; font-weight: bold;">${right_answers[i]}</th>
-        <td style="text-align: center; font-weight: bold; background-color: ${color}">${answers[i]}</th>`);
-    }
-}
-
 let select_all = (deselect = false) => {
     var checkboxes = document.getElementsByName("task_checkbox");
     var inputs = document.getElementsByName("task_input");
