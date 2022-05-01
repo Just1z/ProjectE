@@ -1,18 +1,28 @@
 import os
-from flask import Flask, render_template, redirect, request
-from flask_login import LoginManager, login_user, login_required, \
-    logout_user, current_user
+from datetime import timedelta
+
+from flask import Flask, render_template, redirect, request, jsonify
+from flask_jwt_simple import JWTManager
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from functions import generate_code, to_100, normalize_html
 from data import db_session
 from data.users import User
 from data.variants import Variants
 from data.tasks import Task
 from data.test_sessions import TestSession
+from data import task_resources
 from forms.user import RegisterForm, LoginForm
+from flask_restful import reqparse, abort, Api, Resource
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
+api = Api(app)
 app.config["SECRET_KEY"] = "WVJsu7b3pPCzz5EgY8IWTIynZ45XNEAZYULN2mLW"
+app.config["JWT_SECRET_KEY"] = "EWTIynWVJgY8Isu7b3pPCzzULN25Z4mL5XNEAZYW"
+app.config["JWT_EXPIRES"] = timedelta(hours=24)
+app.config["JWT_IDENTIFY_CLAIM"] = "user"
+app.config["JWT_HEADER_NAME"] = "authorization"
+app.jwt = JWTManager(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -148,4 +158,7 @@ def not_found(error):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
+    app.register_blueprint(task_resources.blueprint)
+    api.add_resource(task_resources.TaskListResources, '/api/v2/tasks/')
+    api.add_resource(task_resources.TaskResource, '/api/v2/tasks/<int:task_id>')
     app.run(host="0.0.0.0", port=port)

@@ -1,6 +1,11 @@
 """ В этом файле находятся функции, используемые в main.py"""
 from random import choice
 
+from flask import make_response, jsonify
+from flask_jwt_simple import create_jwt
+
+from data.users import User
+
 ALL_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 
@@ -28,7 +33,7 @@ mnemonic_table = {'&forall;': '∀', '&part;': '∂', '&exist;': '∃', '&empty;
 
 
 def normalize_html(html_text):
-    print(html_text)
     for key in mnemonic_table.keys():
         html_text = html_text.replace(key, mnemonic_table[key])
     return html_text
+
