@@ -17,3 +17,18 @@ def to_100(primary_points: int) -> int:
              11: 54, 12: 56, 13: 59, 14: 62, 15: 64, 16: 67, 17: 70, 18: 72, 19: 75, 20: 78,
              21: 80, 22: 83, 23: 85, 24: 88, 25: 90, 26: 93, 27: 95, 28: 98, 29: 100}
     return table[primary_points]
+
+
+mnemonic_table = {'&forall;': '∀', '&part;': '∂', '&exist;': '∃', '&empty;': '∅', '&nabla;': '∇', '&amp;in;': '∈', '&notin;': '∉',
+                  '&ni;': '∋', '&prod;': '∏', '&sum;': '∑', '&minus;': '−', '&lowast;': '*', '&radic;': '√', '&prop;': '∝',
+                  '&infin;': '∞', '&ang;': '∠', '&and;': '∧', '&or;': '∨', '&cap;': '∩', '&cup;': '∪', '&int;': '∫',
+                  '&there4;': '∴', '&sim;': '∼', '&cong;': '≅', '&asymp;': '≈', '&ne;': '≠', '&equiv;': '≡', '&le;': '≤',
+                  '&ge;': '≥', '&sub;': '⊂', '&sup;': '⊃', '&nsub;': '⊄', '&sube;': '⊆', '&supe;': '⊇', '&oplus;': '⊕',
+                  '&otimes;': '⊗', '&perp;': '⊥'}
+
+
+def normalize_html(html_text):
+    print(html_text)
+    for key in mnemonic_table.keys():
+        html_text = html_text.replace(key, mnemonic_table[key])
+    return html_text

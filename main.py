@@ -2,7 +2,7 @@ import os
 from flask import Flask, render_template, redirect, request
 from flask_login import LoginManager, login_user, login_required, \
     logout_user, current_user
-from functions import generate_code, to_100
+from functions import generate_code, to_100, normalize_html
 from data import db_session
 from data.users import User
 from data.variants import Variants
@@ -83,7 +83,7 @@ def case(case_id):
     answers = []
     for t_id in tasks:
         task = session.query(Task).filter(Task.id == t_id).first()
-        text = task.html
+        text = normalize_html(task.html)
         ans = task.answer
         file = task.files
         if 'Вопрос 1.' in text:
