@@ -106,6 +106,8 @@ def case(case_id):
         test_session.setUser(current_user.id)
     session.add(test_session)
     session.commit()
+    files.insert(19, "")
+    files.insert(19, "")
     data["files"] = files
     data["code"] = test_session_code
     return render_template("case.html", **data)
