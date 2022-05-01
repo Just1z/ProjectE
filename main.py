@@ -1,9 +1,8 @@
 import os
-from datetime import timedelta
-
-from flask import Flask, render_template, redirect, request, jsonify
-from flask_jwt_simple import JWTManager
+from flask import Flask, render_template, redirect, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_restful import Api
+from sqlalchemy.sql.expression import func
 from functions import generate_code, to_100, normalize_html
 from data import db_session
 from data.users import User
@@ -12,17 +11,11 @@ from data.tasks import Task
 from data.test_sessions import TestSession
 from data import task_resources
 from forms.user import RegisterForm, LoginForm
-from flask_restful import reqparse, abort, Api, Resource
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
 api = Api(app)
 app.config["SECRET_KEY"] = "WVJsu7b3pPCzz5EgY8IWTIynZ45XNEAZYULN2mLW"
-app.config["JWT_SECRET_KEY"] = "EWTIynWVJgY8Isu7b3pPCzzULN25Z4mL5XNEAZYW"
-app.config["JWT_EXPIRES"] = timedelta(hours=24)
-app.config["JWT_IDENTIFY_CLAIM"] = "user"
-app.config["JWT_HEADER_NAME"] = "authorization"
-app.jwt = JWTManager(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -135,8 +128,51 @@ def result():
     return render_template("result.html", **data)
 
 
-@app.route("/generator")
+@app.route("/generator", methods=["GET", "POST"])
 def generator():
+    if request.method == "POST":
+        form = request.form.lists()
+        for i in form:
+            if i[0] == "task_input":
+                tasks = i[1]
+            if i[0] == "var_id":
+                var_id = i[1][0]
+        if var_id:
+            return redirect(f"/case/{var_id}")
+        session = db_session.create_session()
+        data = {"tasks": [], "title": "КЕГЭ", "time": 14100, "tasks_count": 0}
+        files = []
+        answers = []
+        for i, count in enumerate(tasks):
+            count = int(count)
+            tasks = session.query(Task).filter(
+                Task.number == i + 1).order_by(func.random()).limit(count)
+            for task in tasks:
+                text = normalize_html(task.html)
+                ans = task.answer
+                file = task.files
+                if 'Вопрос 1.' in text:
+                    ans = [i[3:] for i in ans.split('<br/>')]
+                    ind2 = text.index('Вопрос 2')
+                    ind3 = text.index('Вопрос 3')
+                    data["tasks"].append(text[:ind2].replace('Вопрос 1.', ''))
+                    data["tasks"].append(text[ind2:ind3].replace('Вопрос 2.', ''))
+                    data["tasks"].append(text[ind3:].replace('Вопрос 3.', ''))
+                    answers.extend(ans)
+                    files.extend((None, None))
+                else:
+                    data["tasks"].append(text)
+                    answers.append(ans)
+                files.append(file)
+        test_session_code = generate_code()
+        test_session = TestSession(id=test_session_code, answers=",".join(answers))
+        if current_user.is_authenticated:
+            test_session.setUser(current_user.id)
+        session.add(test_session)
+        session.commit()
+        data["files"] = files
+        data["code"] = test_session_code
+        return render_template("case.html", **data)
     return render_template("generator.html", title="Генератор")
 
 

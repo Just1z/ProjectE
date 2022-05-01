@@ -1,5 +1,5 @@
 td {
-    width: 120px;
+    min-width: 120px;
 }
 
 input[name="task_checkbox" ] {
@@ -20,4 +20,9 @@ input[name="task_input"] {
     right:3%; top:5px;
     float:right;
     width:70px;
+}
+
+td[name="_1921_"] {
+    width: 150px;
+    display: block;
 }

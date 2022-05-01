@@ -5,9 +5,9 @@
 {% endblock %}
 
 {% block content %}
-<div class="starter-template text-center py-5">
-    <form>
-        <h2>Построить вариант</h2>
+<div class="starter-template text-center py-5" style="margin-top: 20px;">
+    <form action="/generator" method="POST">
+        <h2 style="font-weight: bold;">Построить вариант</h2>
         <p>Вы можете построить свой вариант, указав какие задания необходимо включить в вариант, поставив галочку напротив номера
             задания.</p>
         <p>
@@ -21,15 +21,28 @@
                     for (let row = 0; row < 3; row++) {
                         document.write(`<tr>`);
                         for (let i = 0; i < 9; i++) {
-                            document.write(`
-                                <td>
-                                    <input type="checkbox" name="task_checkbox" 
-                                        id="cbx_${id}" checked="checked" onclick="select_task(${id});">
-                                    <p name="task_number">${id}</p>
-                                    <input type="text" name="task_input" value="1"
-                                        id="inp_${id}" size="4" onkeyup="onInputChange(${id});">
-                                </td>`);
-                            id++;
+                            if (id == 28) {break;}
+                            if (id == 19) {
+                                document.write(`
+                                    <td name="_1921_">
+                                        <input type="checkbox" name="task_checkbox" 
+                                            id="cbx_${id}" checked="checked" onclick="select_task(${id});">
+                                        <p name="task_number">${id}-21</p>
+                                        <input type="text" name="task_input" value="1"
+                                            id="inp_${id}" size="4" onkeyup="onInputChange(${id});">
+                                    </td>`);
+                                id += 3;
+                            } else {
+                                document.write(`
+                                    <td>
+                                        <input type="checkbox" name="task_checkbox" 
+                                            id="cbx_${id}" checked="checked" onclick="select_task(${id});">
+                                        <p name="task_number">${id}</p>
+                                        <input type="text" name="task_input" value="1"
+                                            id="inp_${id}" size="4" onkeyup="onInputChange(${id});">
+                                    </td>`);
+                                id++;
+                            }
                         }
                         document.write(`</tr>`);
                     }
@@ -40,7 +53,7 @@
             <b>Номер варианта:</b>
             <input type="text" name="var_id" id="var_id">
         </p>
-        <input type="submit" class="btn btn-primary" value="Начать тестирование">
+        <input type="submit" onclick="localStorage.clear();" class="btn btn-primary" value="Начать тестирование">
     </form>
 </div>
 {% endblock %}

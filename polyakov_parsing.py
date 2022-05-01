@@ -1,6 +1,5 @@
 import asyncio
 import re
-import time
 import aiohttp
 import requests
 from bs4 import BeautifulSoup
@@ -20,7 +19,8 @@ def collect_variant(id):
         for tag_td in tags:
             script_lines = tag_td.find("script").text.strip().split("\n")
             task_id = re.search(r"\d+", script_lines[0]).group(0)
-            html_content = re.findall(r"""\(([^\[\]]+)\)""", script_lines[1].replace("(", "", 1).strip()[:-2])
+            html_content = re.findall(
+                r"""\(([^\[\]]+)\)""", script_lines[1].replace("(", "", 1).strip()[:-2])
             tasks.append(html_content)
 
         tag_table = soup.find("table", {"class": "varanswer"})
@@ -28,7 +28,9 @@ def collect_variant(id):
         for i, row in enumerate(tag_table.findAll("tr")):
             if i == 0:
                 continue
-            for egeno, answer in zip(row.find_all("td", {"class": "egeno"}), row.find_all("td", {"class": "answer"})):
+            for egeno, answer in zip(
+                    row.find_all("td", {"class": "egeno"}),
+                    row.find_all("td", {"class": "answer"})):
                 if answer.text:
                     answer_table[egeno.text[:-1]] = answer.text
         return {"html": tasks, 'answer': answer_table}
@@ -36,10 +38,10 @@ def collect_variant(id):
     raise Exception("Невозможно обратиться к сайту Полякова")
 
 
-def collect_task(url):
+def collect_task(url, number):
     session = db_session.create_session()
     response = requests.get(url)
-
+    print(number)
     if response:
         try:
             soup = BeautifulSoup(response.text, "lxml")
@@ -47,7 +49,8 @@ def collect_task(url):
             tag_answer = soup.find_all("td", {"class": "answer"})
             for tag_td, answer in zip(tags, tag_answer):
                 answer = answer.find("script").text.strip()
-                answer = re.findall(r"""\(([^\[\]]+)\)""", answer.replace("(", "", 1).strip()[:-2])[0][1:-1]
+                answer = re.findall(
+                    r"""\(([^\[\]]+)\)""", answer.replace("(", "", 1).strip()[:-2])[0][1:-1]
                 files = []
                 script_lines = tag_td.find("script").text.strip().split("\n")
                 task_id = int(re.search(r"\d+", script_lines[0]).group(0))
@@ -56,22 +59,27 @@ def collect_task(url):
                 soup = BeautifulSoup(content, 'lxml')
                 if soup.find('img'):
                     link = 'https://kpolyakov.spb.ru/cms/images/' + soup.find('img')['src']
-                    soup.find('img')['src'] = 'data:image/png;base64,' + b64encode(requests.get(link).content).decode(
-                        "utf-8")
+                    soup.find('img')['src'] = 'data:image/png;base64,' + b64encode(
+                        requests.get(link).content).decode("utf-8")
                 if soup.find('a'):
                     for a in soup.find_all('a'):
                         if not a['href'].startswith('htt'):
                             a['href'] = 'https://kpolyakov.spb.ru/cms/files/' + a['href']
                             files.append(a)
                 if not id:
-                    task = Task(id=task_id, html=str(soup.find('body')).replace('<body>', '').replace('</body>', ''), answer=answer, files=' '.join(map(str, files)))
+                    task = Task(
+                        id=task_id, html=str(soup.find('body')).replace('<body>', '').replace('</body>', ''), 
+                        answer=answer, files=' '.join(map(str, files)),
+                        number=number, author_id=0)
                     session.add(task)
                 else:
                     task = session.query(Task).filter(Task.id == task_id).first()
                     task.html = str(soup.find('body')).replace('<body>', '').replace('</body>', '')
                     task.answer = answer
                     task.files = ' '.join(map(str, files))
-                print(task_id, str(soup.find('body')))
+                    task.number = number
+                    task.author_id = 0
+                #print(task_id, str(soup.find('body')))
                 session.commit()
         except Exception as e:
             print(e)
@@ -184,4 +192,4 @@ if __name__ == "__main__":
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=27&cat161=on']
 
     for link in range(len(links)):
-        collect_task(links[link])
+        collect_task(links[link], link + 1)

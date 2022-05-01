@@ -1,12 +1,19 @@
 """ В этом файле находятся функции, используемые в main.py"""
 from random import choice
 
-from flask import make_response, jsonify
-from flask_jwt_simple import create_jwt
-
-from data.users import User
-
 ALL_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+MNEMONIC_TABLE = {
+    '&forall;': '∀', '&part;': '∂', '&exist;': '∃', '&empty;': '∅',
+    '&nabla;': '∇', '&amp;in;': '∈', '&notin;': '∉',
+    '&ni;': '∋', '&prod;': '∏', '&sum;': '∑', '&minus;': '−',
+    '&lowast;': '*', '&radic;': '√', '&prop;': '∝',
+    '&infin;': '∞', '&ang;': '∠', '&and;': '∧', '&or;': '∨',
+    '&cap;': '∩', '&cup;': '∪', '&int;': '∫',
+    '&there4;': '∴', '&sim;': '∼', '&cong;': '≅', '&asymp;': '≈',
+    '&ne;': '≠', '&equiv;': '≡', '&le;': '≤',
+    '&ge;': '≥', '&sub;': '⊂', '&sup;': '⊃', '&nsub;': '⊄',
+    '&sube;': '⊆', '&supe;': '⊇', '&oplus;': '⊕',
+    '&otimes;': '⊗', '&perp;': '⊥'}
 
 
 def generate_code():
@@ -24,16 +31,8 @@ def to_100(primary_points: int) -> int:
     return table[primary_points]
 
 
-mnemonic_table = {'&forall;': '∀', '&part;': '∂', '&exist;': '∃', '&empty;': '∅', '&nabla;': '∇', '&amp;in;': '∈', '&notin;': '∉',
-                  '&ni;': '∋', '&prod;': '∏', '&sum;': '∑', '&minus;': '−', '&lowast;': '*', '&radic;': '√', '&prop;': '∝',
-                  '&infin;': '∞', '&ang;': '∠', '&and;': '∧', '&or;': '∨', '&cap;': '∩', '&cup;': '∪', '&int;': '∫',
-                  '&there4;': '∴', '&sim;': '∼', '&cong;': '≅', '&asymp;': '≈', '&ne;': '≠', '&equiv;': '≡', '&le;': '≤',
-                  '&ge;': '≥', '&sub;': '⊂', '&sup;': '⊃', '&nsub;': '⊄', '&sube;': '⊆', '&supe;': '⊇', '&oplus;': '⊕',
-                  '&otimes;': '⊗', '&perp;': '⊥'}
-
-
 def normalize_html(html_text):
-    for key in mnemonic_table.keys():
-        html_text = html_text.replace(key, mnemonic_table[key])
+    """Приводит HTML в порядок для нормального отображения на сайте"""
+    for key, value in MNEMONIC_TABLE.items():
+        html_text = html_text.replace(key, value)
     return html_text
-
