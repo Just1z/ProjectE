@@ -1,0 +1,12 @@
+aiohttp==3.7.4.post0
+beautifulsoup4==4.11.1
+Flask==2.0.2
+Flask_Login==0.5.0
+Flask_RESTful==0.3.9
+Flask_WTF==1.0.0
+Pillow==9.1.0
+requests==2.27.1
+SQLAlchemy==1.4.31
+SQLAlchemy_serializer==1.4.1
+Werkzeug==2.0.3
+WTForms==3.0.1
