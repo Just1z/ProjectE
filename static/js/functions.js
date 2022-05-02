@@ -1,8 +1,9 @@
 function isNumber(n) { return !isNaN(parseInt(n)) && !isNaN(n - 0) }
 
-var interval = ''
+var interval = '';
 
-function contador(time) {
+
+function Timer(time) {
     var hr = localStorage.getItem("hr");
     var mm = localStorage.getItem("mm");
     var ss = localStorage.getItem("ss");
@@ -39,27 +40,63 @@ function contador(time) {
         if (mm.toString().length < 2) {
             mm = "0" + mm;
         }
-        if (ss.toString().length < 2) {
-            ss = "0" + ss;
-        }
         $(".time").html('<span class="hours">' + hr + '</span>:<span class="minutes">' + mm + '</span>');
         localStorage.setItem("hr", hr);
         localStorage.setItem("mm", mm);
         localStorage.setItem("ss", ss);}, 1000)
 }
 
+
 function changeActiveElementNext() {
-    var element = document.querySelectorAll('ul > li.active');
-    var element_next = element.nextSibling;
+    var slidesCount = document.getElementsByClassName("ind").length;
+    var element = document.querySelectorAll("ul > li.active")[0];
+    if (Number(element.querySelector("button").innerHTML) + 1!=slidesCount) {
+        var element_next = element.nextElementSibling;
+        element.classList.remove("active");
+        element_next.classList.add("active");
+    } else {
+        var element_next = document.querySelectorAll("ul > li.ind")[0];
+        element.classList.remove("active");
+        element_next.classList.add("active");
+    }
+}
+
+
+function changeActiveElementPrevious() {
+    var slidesCount = document.getElementsByClassName("ind").length;
+    var element = document.querySelectorAll("ul > li.active")[0];
+    console.log(element.querySelector("button").innerHTML=="i") // Выводит "i"
+    if (element.querySelector("button").innerHTML!=="i") { // Но выполняется это условие
+        var element_prev = element.previousElementSibling;
+        element.classList.remove("active");
+        element_prev.classList.add("active");
+    } else {
+        var element_prev = document.querySelectorAll("ul > li.ind")[slidesCount];
+        element.classList.remove("active");
+        element_prev.classList.add("active");
+    }
 }
 
 
 let save_answer = (number) => {
-    var answer = document.getElementsByClassName('answer me-2')[number-1].value;
+    if (number == 25) {
+        var answers25 = document.getElementsByName("input_25");
+        var answer = ``;
+        for (let i = 0; i < answers25.length; i+=2) {
+            if (answers25[i].value && answers25[i+1].value) {
+                answer += `${answers25[i].value} ${answers25[i+1].value}<br/>`;
+            } else if (answers25[i].value) {
+                answer += `${answers25[i].value}<br/>`;
+            }
+        }
+        answer = answer.slice(0, -5);
+    }
+    else {
+        var answer = document.getElementsByClassName('answer me-2')[number-1].value;
+    }
     var answers = localStorage.getItem('answers');
     answers = answers.split(",")
     answers[number-1] = answer;
-    console.log(answers)
     localStorage.setItem("answers", answers);
 }
 
