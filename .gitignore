@@ -2,9 +2,8 @@
 .idea/
 /venv/
 /idea/
+__pycache__/
 data/__pycache__/
 forms/__pycache__/
-kpolyakov/
-__pycache__/
 .pytest_cache/
-/settings.ini
+settings.ini

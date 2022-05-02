@@ -79,11 +79,24 @@ function changeActiveElementPrevious() {
 
 
 let save_answer = (number) => {
-    var answer = document.getElementsByClassName('answer me-2')[number-1].value;
+    if (number == 25) {
+        var answers25 = document.getElementsByName("input_25");
+        var answer = ``;
+        for (let i = 0; i < answers25.length; i+=2) {
+            if (answers25[i].value && answers25[i+1].value) {
+                answer += `${answers25[i].value} ${answers25[i+1].value}<br/>`;
+            } else if (answers25[i].value) {
+                answer += `${answers25[i].value}<br/>`;
+            }
+        }
+        answer = answer.slice(0, -5);
+    }
+    else {
+        var answer = document.getElementsByClassName('answer me-2')[number-1].value;
+    }
     var answers = localStorage.getItem('answers');
     answers = answers.split(",")
     answers[number-1] = answer;
-    console.log(answers)
     localStorage.setItem("answers", answers);
 }
 

@@ -16,7 +16,7 @@
 </head>
 <body>
     <script>
-        localStorage.setItem("test_session", '{{ code }}');
+        localStorage.setItem("test_session", test_session);
     </script>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-2">
     <div class="container-fluid">
@@ -24,15 +24,12 @@
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <span class="time">
-                        <script>Timer({{ time }});</script>
+                        <script>contador({{ time }});</script>
                         <span class="hours">00</span>:<span class="minutes">00</span>
                     </span>
                 </li>
                 <li class="nav-item">
                     <span>КИМ № {{ kim_number }}</span>
-                </li>
-                <li class="nav-item">
-                    <span>БР № {{ br_number }}</span>
                 </li>
             </ul>
         </div>
@@ -48,18 +45,18 @@
             <div class="d-flex flex-column align-items-center flex-shrink-0 text-secondary"
                  style="width: 110px;">
                 <h6>Дано ответов</h6>
-                <h3 style="color:#343a40;">0/27</h3>
+                <h3 style="color:#343a40;">0/{{count}}</h3>
                 <div class="list-group list-group-flush"
                      style="overflow-y: scroll; overflow-x: hidden; max-height: 85vh;">
                     <ul class="nav nav-pills nav-flush flex-column mb-auto text-center indicators">
-                        <li class="nav-item ind active">
+                        <li class="nav-item active">
                             <button data-bs-target="#carouselDark" data-bs-slide-to="0"
                                     class="nav-link border bg-white text-secondary active"
                                     aria-current="true">i
                             </button>
                         </li>
-                        {% for i in range(1, 28) %}
-                        <li class="nav-item ind">
+                        {% for i in range(1, count + 1) %}
+                        <li class="nav-item">
                             <button type="button" data-bs-target="#carouselDark" data-bs-slide-to="{{ i }}"
                                     class="nav-link border bg-white text-secondary"
                                     aria-current="true">{{ i }}
@@ -72,7 +69,7 @@
         </div>
         <div class="col-auto max-height align-items-center" style="position: relative;">
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselDark"
-                    data-bs-slide="prev" onclick="changeActiveElementPrevious()" style="width: 100%;">
+                    data-bs-slide="prev" style="width: 100%;">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Previous</span>
             </button>
@@ -118,11 +115,18 @@
                             </div>
                         </div>
                     </div>
-                    {% for i in range(1, 28) %}
+                    {% for i in range(1, count + 1) %}
                     <div class="carousel-item">
+                        {% if i == 25 %}
+                        <div class="card" style="height: 45vh;">
+                        {% else %}
                         <div class="card">
+                        {% endif %}
                             <div class="card-body">
                                 <h5 class="card-title"><b>Задание {{ i }}</b></h5>
+                                <div class="outline">
+                                    <p>{{numbers[i-1]}}</p>
+                                </div>
                                 <script>
                                     document.write('{{ tasks[i-1]|safe }}');
                                 </script>
@@ -138,7 +142,39 @@
                                 {% endif %}
                             </div>
                             <form class="d-flex">
-                                <input class="answer me-2" type="text" aria-label="save-answer" id="{{ i }}">
+                                {% if i == 25 %}
+                                <table class="table_25">
+                                    <tr>
+                                        <td style="width:50px;">
+                                            <span>&nbsp;</span>
+                                        </td>
+                                        <td style="width:110px;">
+                                            <span style="left: 45%; position: relative;">1</span>
+                                        </td>
+                                        <td style="width:110px; left: 45%; position: relative;">
+                                            <span style="right: 55%; position: relative;">2</span>
+                                        </td>
+                                    </tr>
+                                    <script>
+                                        for (let i = 1; i <= 12; i++) {
+                                            document.write(`
+                                                <tr>
+                                                    <td style="width:50px; text-align: center;">
+                                                        <span>${i}</span>
+                                                    </td>
+                                                    <td style="width:200px;">
+                                                        <input class="answer me-2" name="input_25" type="text" id="25_${i}_1">
+                                                    </td>
+                                                    <td style="width:200px;">
+                                                        <input class="answer me-2" name="input_25" type="text" id="25_${i}_2">
+                                                    </td>
+                                                </tr>`)
+                                        }
+                                    </script>
+                                </table>
+                                {% else %}
+                                    <input class="answer me-2" type="text" aria-label="save-answer" id="{{ i }}">
+                                {% endif %}
                                 <button class="btn btn-outline-dark answer" type="button" id="submit"
                                         onclick="save_answer({{i}});">Сохранить ответ
                                 </button>

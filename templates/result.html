@@ -13,8 +13,8 @@
         {% for right_answer in right_answers %}
         <tr class="user_results">
             <td style="text-align: center;">{{loop.index}}</td>
-            <td style="text-align: center;"><script>document.write('{{right_answer|safe}}')</script></td>
             <script>
+                document.write(`<td style="text-align: center;">{{right_answer|safe}}</td>`);
                 var answers = localStorage.getItem('answers');
                 if (!answers) {
                     document.write(`<td style="text-align: center; background-color: #696969">Нет ответа</td>`);
@@ -22,7 +22,7 @@
                     var answer = answers.split(",")[{{loop.index0}}];
                     var color = "";
                     if (answer.length) {
-                        if (answer == `{{right_answer}}`) {
+                        if (answer == `{{right_answer|safe}}`) {
                             color = "#00FF7F";
                         } else {
                             color = "#FF4940";
