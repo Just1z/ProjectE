@@ -1,12 +1,11 @@
 import os
-from datetime import timedelta
-from configparser import ConfigParser
+import logging
 from flask import Flask, render_template, redirect, request
 from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api
 from sqlalchemy.sql.expression import func
-from functions import generate_code, to_100, normalize_html
+from functions import generate_code, normalize_html
 from data import db_session
 from data.users import User
 from data.variants import Variants
@@ -15,13 +14,12 @@ from data.test_sessions import TestSession
 from data import task_resources
 from forms.user import RegisterForm, LoginForm
 
+
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
 api = Api(app)
-config = ConfigParser()
-config.read("settings.ini")
-app.config["SECRET_KEY"] = config["settings"]["secret_key"]
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
+app.config["SECRET_KEY"] = "WVJsu7b3pPCzz5EgY8IWTIynZ45XNEAZYULN2mLW"
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -70,7 +68,7 @@ def login():
     return render_template('login.html', title='Вход', form=form)
 
 
-@app.route('/logout')
+@app.route("/logout", methods=["GET", "POST"])
 @login_required
 def logout():
     logout_user()
@@ -139,9 +137,8 @@ def test(tasks_ids=None):
     data = {"tasks": [], "title": "КЕГЭ", "time": 14100, "numbers": [], "count": 0}
     files = []
     answers = []
-    tasks = session.query(Task).filter(Task.id.in_(tasks_ids)).all()
-    tasks = [next(t for t in tasks if t.id == t_id) for t_id in tasks_ids]
-    for task in tasks:
+    for t_id in tasks_ids:
+        task = session.query(Task).filter(Task.id == t_id).first()
         text = normalize_html(task.html)
         ans = task.answer
         file = task.files
@@ -153,25 +150,24 @@ def test(tasks_ids=None):
             data["tasks"].append(text[ind2:ind3].replace('Вопрос 2.', ''))
             data["tasks"].append(text[ind3:].replace('Вопрос 3.', ''))
             answers.extend(ans)
-            files.extend((None, None))
-            data["numbers"].extend((19, 20, 21))
             data["count"] += 3
         else:
             data["tasks"].append(text)
             answers.append(ans)
-            data["numbers"].append(task.number)
             data["count"] += 1
         files.append(file)
-    test_session_code = generate_code()
+    # Заносим сессию в базу данных
+    test_session_code = generate_code()  # Код сессии
+    # Вероятность получения уже существующего кода -> 0
     test_session = TestSession(id=test_session_code, answers=",".join(answers))
     if current_user.is_authenticated:
         test_session.setUser(current_user.id)
     session.add(test_session)
     session.commit()
+    files.insert(19, "")
+    files.insert(19, "")
     data["files"] = files
     data["code"] = test_session_code
-    if flask_session.get("var_id"):
-        data["kim_number"] = flask_session.get("var_id")
     return render_template("case.html", **data)
 
 
@@ -193,7 +189,6 @@ def not_found(error):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.register_blueprint(task_resources.blueprint)
-    api.add_resource(task_resources.TaskListResources, '/api/v2/tasks/')
-    api.add_resource(task_resources.TaskResource, '/api/v2/tasks/<int:task_id>')
+    api.add_resource(task_resources.TaskListResources, '/api/tasks/')
+    api.add_resource(task_resources.TaskResource, '/api/tasks/<int:task_id>')
     app.run(host="0.0.0.0", port=port)
