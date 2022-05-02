@@ -1,6 +1,6 @@
 import os
 import logging
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, url_for
 from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api
@@ -180,6 +180,11 @@ def task_database():
 @app.route("/index")
 def index():
     return render_template("index.html", title='КЕГЭ')
+
+
+@app.route('/favicon.ico')
+def favicon():
+    return url_for("static", filename="img/logo.png")
 
 
 @app.errorhandler(404)
