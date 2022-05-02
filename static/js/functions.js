@@ -71,7 +71,12 @@ let save_answer = (number) => {
         var answer = document.getElementsByClassName('answer me-2')[number-1].value;
     }
     var answers = localStorage.getItem('answers');
-    answers = answers.split(",")
+    if (!answers) {
+        answers = ["", "", "", "", "", "", "", "", "", "", "", "", 
+            "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
+    } else {
+        answers = answers.split(",")
+    }
     answers[number-1] = answer;
     localStorage.setItem("answers", answers);
 }

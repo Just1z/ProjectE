@@ -97,10 +97,7 @@ def result():
     session = db_session.create_session()
     right_answers = session.query(TestSession).filter(
         TestSession.id == code).first().answers.split(",")
-    primary_points = 0
-    #answers = 
-    data = {"right_answers": right_answers, "title": "Результаты",
-            "primary_points": primary_points, "secondary_points": to_100(primary_points)}
+    data = {"right_answers": right_answers, "title": "Результаты"}
     return render_template("result.html", **data)
 
 
