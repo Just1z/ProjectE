@@ -1,5 +1,8 @@
 import os
+from datetime import timedelta
+from configparser import ConfigParser
 from flask import Flask, render_template, redirect, request
+from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api
 from sqlalchemy.sql.expression import func
@@ -15,7 +18,10 @@ from forms.user import RegisterForm, LoginForm
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
 api = Api(app)
-app.config["SECRET_KEY"] = "WVJsu7b3pPCzz5EgY8IWTIynZ45XNEAZYULN2mLW"
+config = ConfigParser()
+config.read("settings.ini")
+app.config["SECRET_KEY"] = config["settings"]["secret_key"]
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -80,12 +86,65 @@ def profile():
 def case(case_id):
     session = db_session.create_session()
     tasks = session.query(Variants).filter(Variants.id == case_id).first()
-    data = {"tasks": [], "kim_number": "1", "br_number": 1, "title": "КЕГЭ", "time": tasks.time}
-    tasks = tasks.tasks.split(', ')
+    tasks_ids = list(map(int, tasks.tasks.split(', ')))
+    flask_session["var_id"] = str(case_id)
+    return test(tasks_ids)
+
+
+@app.route("/result/", methods=["GET"])
+def result():
+    code = request.args.get("sess")
+    session = db_session.create_session()
+    right_answers = session.query(TestSession).filter(
+        TestSession.id == code).first().answers.split(",")
+    primary_points = 0
+    #answers = 
+    data = {"right_answers": right_answers, "title": "Результаты",
+            "primary_points": primary_points, "secondary_points": to_100(primary_points)}
+    return render_template("result.html", **data)
+
+
+@app.route("/generator", methods=["GET", "POST"])
+def generator():
+    if request.method == "POST":
+        for i in request.form.lists():
+            if i[0] == "task_input":
+                tasks = i[1]
+            if i[0] == "var_id":
+                var_id = i[1][0]
+        session = db_session.create_session()
+        tasks_ids = []
+        if var_id:
+            tasks = session.query(Variants).filter(Variants.id == var_id).first()
+            tasks_ids = list(map(int, tasks.tasks.split(', ')))
+        else:
+            for i, count in enumerate(tasks):
+                number = i + 1
+                if i >= 19:
+                    number += 2
+                tasks = session.query(Task).filter(
+                    Task.number ==number).order_by(func.random()).limit(int(count))
+                tasks_ids.extend(task.id for task in tasks)
+        flask_session["tasks_ids"] = tasks_ids
+        flask_session["var_id"] = "-"
+        return redirect("/test", 301)
+    return render_template("generator.html", title="Генератор")
+
+
+@app.route("/test")
+def test(tasks_ids=None):
+    if not tasks_ids:
+        if flask_session.get("tasks_ids", []):
+            tasks_ids = flask_session.get("tasks_ids")
+        else:
+            return redirect("/", 304)
+    session = db_session.create_session()
+    data = {"tasks": [], "title": "КЕГЭ", "time": 14100, "numbers": [], "count": 0}
     files = []
     answers = []
-    for t_id in tasks:
-        task = session.query(Task).filter(Task.id == t_id).first()
+    tasks = session.query(Task).filter(Task.id.in_(tasks_ids)).all()
+    tasks = [next(t for t in tasks if t.id == t_id) for t_id in tasks_ids]
+    for task in tasks:
         text = normalize_html(task.html)
         ans = task.answer
         file = task.files
@@ -97,83 +156,26 @@ def case(case_id):
             data["tasks"].append(text[ind2:ind3].replace('Вопрос 2.', ''))
             data["tasks"].append(text[ind3:].replace('Вопрос 3.', ''))
             answers.extend(ans)
+            files.extend((None, None))
+            data["numbers"].extend((19, 20, 21))
+            data["count"] += 3
         else:
             data["tasks"].append(text)
             answers.append(ans)
+            data["numbers"].append(task.number)
+            data["count"] += 1
         files.append(file)
-    # Заносим сессию в базу данных
-    test_session_code = generate_code()  # Код сессии
-    # Вероятность получения уже существующего кода -> 0
+    test_session_code = generate_code()
     test_session = TestSession(id=test_session_code, answers=",".join(answers))
     if current_user.is_authenticated:
         test_session.setUser(current_user.id)
     session.add(test_session)
     session.commit()
-    files.insert(19, "")
-    files.insert(19, "")
     data["files"] = files
     data["code"] = test_session_code
+    if flask_session.get("var_id"):
+        data["kim_number"] = flask_session.get("var_id")
     return render_template("case.html", **data)
-
-
-@app.route("/result/", methods=["GET"])
-def result():
-    code = request.args.get("sess")
-    session = db_session.create_session()
-    right_answers = session.query(TestSession).filter(
-        TestSession.id == code).first().answers.split(",")
-    primary_points = 29
-    data = {"right_answers": right_answers, "title": "Результаты",
-            "primary_points": primary_points, "secondary_points": to_100(primary_points)}
-    return render_template("result.html", **data)
-
-
-@app.route("/generator", methods=["GET", "POST"])
-def generator():
-    if request.method == "POST":
-        form = request.form.lists()
-        for i in form:
-            if i[0] == "task_input":
-                tasks = i[1]
-            if i[0] == "var_id":
-                var_id = i[1][0]
-        if var_id:
-            return redirect(f"/case/{var_id}")
-        session = db_session.create_session()
-        data = {"tasks": [], "title": "КЕГЭ", "time": 14100, "tasks_count": 0}
-        files = []
-        answers = []
-        for i, count in enumerate(tasks):
-            count = int(count)
-            tasks = session.query(Task).filter(
-                Task.number == i + 1).order_by(func.random()).limit(count)
-            for task in tasks:
-                text = normalize_html(task.html)
-                ans = task.answer
-                file = task.files
-                if 'Вопрос 1.' in text:
-                    ans = [i[3:] for i in ans.split('<br/>')]
-                    ind2 = text.index('Вопрос 2')
-                    ind3 = text.index('Вопрос 3')
-                    data["tasks"].append(text[:ind2].replace('Вопрос 1.', ''))
-                    data["tasks"].append(text[ind2:ind3].replace('Вопрос 2.', ''))
-                    data["tasks"].append(text[ind3:].replace('Вопрос 3.', ''))
-                    answers.extend(ans)
-                    files.extend((None, None))
-                else:
-                    data["tasks"].append(text)
-                    answers.append(ans)
-                files.append(file)
-        test_session_code = generate_code()
-        test_session = TestSession(id=test_session_code, answers=",".join(answers))
-        if current_user.is_authenticated:
-            test_session.setUser(current_user.id)
-        session.add(test_session)
-        session.commit()
-        data["files"] = files
-        data["code"] = test_session_code
-        return render_template("case.html", **data)
-    return render_template("generator.html", title="Генератор")
 
 
 @app.route("/task_database")

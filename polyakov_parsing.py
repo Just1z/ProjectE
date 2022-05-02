@@ -192,4 +192,7 @@ if __name__ == "__main__":
              'https://kpolyakov.spb.ru/school/ege/gen.php?action=viewAllEgeNo&egeId=27&cat161=on']
 
     for link in range(len(links)):
-        collect_task(links[link], link + 1)
+        if link >= 19:
+            collect_task(links[link], link + 3)
+        else:
+            collect_task(links[link], link + 1)
