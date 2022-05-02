@@ -1,4 +1,6 @@
 import os
+from base64 import b64encode
+
 from flask import Flask, render_template, redirect, request
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api
@@ -11,6 +13,7 @@ from data.tasks import Task
 from data.test_sessions import TestSession
 from data import task_resources
 from forms.user import RegisterForm, LoginForm
+from forms.task import TaskForm
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
@@ -179,6 +182,30 @@ def generator():
 @app.route("/task_database")
 def task_database():
     return render_template("task_database.html", title="База заданий")
+
+
+@app.route("/add_task", methods=['GET', 'POST'])
+@login_required
+def add_task():
+    form = TaskForm()
+    if form.validate_on_submit():
+        number = form.number.data
+        task = form.task.data
+        answer = form.answer.data
+        file = b64encode(request.files["files"].read()).decode("utf-8")
+        img = b64encode(request.files["img"].read()).decode("utf-8")
+        # session = db_session.create_session()
+        # task = Task()
+        # task.html = form.task.data
+        # task.number = form.number.data
+        # task.answer = form.answer.data
+        # if request.form.get('Файлы'):
+        #     task.files = 'data:image/png;base64,' + b64encode(request.files['file'].read()).decode("utf-8")
+        # task.author_id = session["user_id"]
+        # session.add(task)
+        # session.commit()
+        return redirect('/')
+    return render_template('add_task.html', title='Создание задачи', form=form)
 
 
 @app.route("/")

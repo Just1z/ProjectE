@@ -13,7 +13,7 @@
         {% for right_answer in right_answers %}
         <tr class="user_results">
             <td style="text-align: center;">{{loop.index}}</td>
-            <td style="text-align: center;">{{right_answer}}</td>
+            <td style="text-align: center;"><script>document.write('{{right_answer|safe}}')</script></td>
             <script>
                 var answers = localStorage.getItem('answers');
                 if (!answers) {
