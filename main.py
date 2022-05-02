@@ -67,6 +67,13 @@ def login():
     return render_template('login.html', title='Вход', form=form)
 
 
+@app.route("/logout", methods=["GET", "POST"])
+@login_required
+def logout():
+    logout_user()
+    return redirect("/")
+
+
 @app.route("/profile")
 def profile():
     return render_template("profile.html", title='КЕГЭ')
