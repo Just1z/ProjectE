@@ -1,8 +1,9 @@
 import os
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, make_response, jsonify
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api
 from sqlalchemy.sql.expression import func
+
 from functions import generate_code, to_100, normalize_html
 from data import db_session
 from data.users import User
@@ -11,9 +12,11 @@ from data.tasks import Task
 from data.test_sessions import TestSession
 from data import task_resources
 from forms.user import RegisterForm, LoginForm
+import logging
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
+app.logger.setLevel(logging.INFO)
 api = Api(app)
 app.config["SECRET_KEY"] = "WVJsu7b3pPCzz5EgY8IWTIynZ45XNEAZYULN2mLW"
 login_manager = LoginManager()
@@ -62,13 +65,6 @@ def login():
                                message="Неправильный логин или пароль",
                                form=form, title='Вход')
     return render_template('login.html', title='Вход', form=form)
-
-
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect("/")
 
 
 @app.route("/profile")
@@ -194,7 +190,6 @@ def not_found(error):
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.register_blueprint(task_resources.blueprint)
-    api.add_resource(task_resources.TaskListResources, '/api/v2/tasks/')
-    api.add_resource(task_resources.TaskResource, '/api/v2/tasks/<int:task_id>')
+    api.add_resource(task_resources.TaskListResources, '/api/tasks/')
+    api.add_resource(task_resources.TaskResource, '/api/tasks/<int:task_id>')
     app.run(host="0.0.0.0", port=port)
