@@ -7,7 +7,8 @@
 <div class="py-5">
     <h2 style="margin-top: 20px; text-align: center;">База заданий</h2>
     <h4>Все задачи по номеру в КИМ</h4>
-    <p>Вы можете увидеть сразу все задачи, которые есть в базе для заданного номера задания в контрольно-измерительных материалах (КИМ) ЕГЭ по информатике.</p>
+    <p>Вы можете увидеть сразу все задачи, которые есть в базе для заданного номера задания в контрольно-измерительных материалах
+        (КИМ) ЕГЭ по информатике.</p>
     <div style="display: flex; gap: 20px;">
         <select id="egeId" style="width:100%;">
             <option value="1">1. Анализ информационных моделей</option>
@@ -36,13 +37,19 @@
             <option value="26">26. Обработка данных с помощью сортировки</option>
             <option value="27">27. Обработка потока данных</option>
         </select>
-        <button type="button" style="width:100%;" class="btn btn-secondary" onclick="return getAllTasks()">Найти все задачи</button>
+        <button type="button" style="width:100%;" class="btn btn-secondary" onclick="return getAllTasks()">Найти все задачи
+        </button>
     </div>
     <h4 style="margin-top: 20px;">Показать задачу</h4>
     <p>Вы можете вывести на экран задачу, если вы знаете её номер в базе данных.</p>
     <div style="display: flex; gap: 20px;">
         <input class="answer me-2" style="width:100%;" type="text" placeholder="Номер задачи" id="task_id">
         <button type="button" style="width: 100%;" class="btn btn-secondary" onclick="return getTask()">Показать задачу</button>
+    </div>
+    <h4 style="margin-top: 20px;">Добавить задачу в базу заданий</h4>
+    <p>Вы можете добавить в базу заданий авторскую задачу с приложением к ней файлов.</p>
+    <div style="display: flex; gap: 20px;" align="center">
+        <a aria-current="page" href="/add_task" class="btn btn-secondary">Добавить задачу</a>
     </div>
 </div>
 {% endblock %}

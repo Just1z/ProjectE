@@ -229,29 +229,43 @@ def show_task():
 def new_task():
     form = TaskForm()
     if request.method == "POST":
+        db_sess = db_session.create_session()
+
         number = form.number.data
         condition = form.task.data
         answer = form.answer.data
-        # TODO form.file1, form.file2
-        file1: FileStorage = form.files.data
-        file2: FileStorage = None
-        images = form.img.data
+        file1: FileStorage = form.file1.data
+        file2: FileStorage = form.file2.data
+        image: FileStorage = form.img.data
         html = f'<p>{condition}</p>'
-        if images.content_length != 0:
-            html += f'<img src="data:image/png,{b64encode(images.stream.read()).decode("utf-8")}/>'
 
-        db_sess = db_session.create_session()
+        f1stream = file1.stream.read()
+        f2stream = file2.stream.read()
+        imgstream = image.stream.read()
+        if len(imgstream) != 0:
+            html += f'<img src="data:image/png,{b64encode(imgstream).decode("utf-8")}/>'
+
+        files = []
+        if len(f1stream) == 0 and len(f2stream) != 0:
+            pass  # TODO сообщение об ошибке
+        elif len(f1stream) != 0:
+            last_task = db_sess.query(Task).order_by(Task.id)[-1]
+            path = f"db/files/{last_task.id + 1}_"
+            file1.save(path + "1." + file1.content_type.split("/")[1])
+            files.append(path + "1." + file1.content_type.split("/")[1])
+            if len(f2stream) != 0:
+                file2.save(path + "2." + file2.content_type.split("/")[1])
+                files.append(path + "2." + file2.content_type.split("/")[1])
         task = Task(
             html=html,
             answer=answer,
-            files="",  # TODO file1 save, file2 save and format ' files = "" '
+            files=" ".join(map(lambda e: f'<a href="{e}"</a>', files)),
             number=number,
             author_id=current_user.id
         )
         db_sess.add(task)
         db_sess.commit()
-        return redirect("/")
-
+        return redirect("/task_database")
     return render_template("add_task.html", form=form)
 
 

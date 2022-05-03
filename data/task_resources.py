@@ -48,10 +48,10 @@ def check_authentication():
     """
     if not request.json:
         return abort(400, message=f"error: empty request")
-    elif not all(key in request.json for key in ["email", "password"]):
+    elif not all(key in request.json for key in ["login", "password"]):
         return abort(400, message=f"error: bad request")
     db_sess = db_session.create_session()
-    user = db_sess.query(User).filter(User.email == request.json["email"]).first()
+    user = db_sess.query(User).filter(User.email == request.json["login"]).first()
     if user and user.check_password(request.json["password"]):
         app.logger.info(f"api {request.remote_addr} - logged in as User(id={user.id})")
         return user.id

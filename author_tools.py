@@ -1,8 +1,8 @@
 """Инструменты для добавления на сайт авторских задач"""
 from requests import get, post, put, delete
 
-EMAIL_ = "email@example.com"
-PASSWORD_ = "qwertyuiop"
+LOGIN_ = "login"
+PASSWORD_ = "password"
 BASE_URL = "http://192.168.43.230:5000/api/tasks/"
 
 

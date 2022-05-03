@@ -2,7 +2,8 @@
 
 {% block content %}
 <div class="py-5">
-    <h1 style="margin-top: 20px;">Создание нового задания</h1>
+    <h1 style="margin-top: 20px;">Добавление авторской задачи в базу заданий</h1>
+    <p>Для добавления задач по теории игр указывайте в качестве номера задачи номер 19.</p>
     <form action="" method="post" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
         <p>
@@ -33,9 +34,18 @@
             {% endfor %}
         </p>
         <p>
-            {{ form.files.label }}<br>
-            {{ form.files }}<br>
-            {% for error in form.files.errors %}
+            {{ form.file1.label }}<br>
+            {{ form.file1 }}<br>
+            {% for error in form.file1.errors %}
+                <p content="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.file2.label }}<br>
+            {{ form.file2 }}<br>
+            {% for error in form.file2.errors %}
                 <p content="alert alert-danger" role="alert">
                     {{ error }}
                 </p>

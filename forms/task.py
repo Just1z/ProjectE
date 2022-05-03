@@ -7,6 +7,7 @@ class TaskForm(FlaskForm):
     number = StringField('Номер задачи', validators=[DataRequired()])
     task = StringField('Условие задачи', validators=[DataRequired()])
     answer = StringField('Ответ', validators=[DataRequired()])
-    files = FileField('Файлы')
+    file1 = FileField('Файл 1')
+    file2 = FileField('Файл 2')
     img = FileField('Картинка')
     submit = SubmitField('Добавить')

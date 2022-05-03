@@ -8,37 +8,8 @@ from data import db_session
 from data.tasks import Task
 
 
-def collect_variant(id):
-    url = f"https://kpolyakov.spb.ru/school/ege/gen.php?action=viewVar&answers=on&varId={id}"
-    response = requests.get(url)
-
-    if response:
-        tasks = []
-        soup = BeautifulSoup(response.text, "lxml")
-        tags = soup.find_all("td", {"class": "topicview"})
-        for tag_td in tags:
-            script_lines = tag_td.find("script").text.strip().split("\n")
-            task_id = re.search(r"\d+", script_lines[0]).group(0)
-            html_content = re.findall(
-                r"""\(([^\[\]]+)\)""", script_lines[1].replace("(", "", 1).strip()[:-2])
-            tasks.append(html_content)
-
-        tag_table = soup.find("table", {"class": "varanswer"})
-        answer_table = {}
-        for i, row in enumerate(tag_table.findAll("tr")):
-            if i == 0:
-                continue
-            for egeno, answer in zip(
-                    row.find_all("td", {"class": "egeno"}),
-                    row.find_all("td", {"class": "answer"})):
-                if answer.text:
-                    answer_table[egeno.text[:-1]] = answer.text
-        return {"html": tasks, 'answer': answer_table}
-
-    raise Exception("Невозможно обратиться к сайту Полякова")
-
-
 def collect_task(url, number):
+    """Собирает в базу данных все задания под номером number"""
     session = db_session.create_session()
     response = requests.get(url)
     print(number)
@@ -68,7 +39,7 @@ def collect_task(url, number):
                             files.append(a)
                 if not id:
                     task = Task(
-                        id=task_id, html=str(soup.find('body')).replace('<body>', '').replace('</body>', ''), 
+                        id=task_id, html=str(soup.find('body')).replace('<body>', '').replace('</body>', ''),
                         answer=answer, files=' '.join(map(str, files)),
                         number=number, author_id=0)
                     session.add(task)
@@ -79,7 +50,7 @@ def collect_task(url, number):
                     task.files = ' '.join(map(str, files))
                     task.number = number
                     task.author_id = 0
-                #print(task_id, str(soup.find('body')))
+                # print(task_id, str(soup.find('body')))
                 session.commit()
         except Exception as e:
             print(e)
@@ -134,30 +105,6 @@ def parse(html, task):
         for egeno, answer in zip(row.find_all("td", {"class": "egeno"}), row.find_all("td", {"class": "answer"})):
             answer_table[egeno.text[:-1]] = answer.text
     return {"html": html_content, "id": task_id, "answer": answer_table[str(task)]}
-
-
-async def get_html(session, task):
-    select_id = hex(int("1" + "0" * (task - 1), 2))[2:]
-    url = f"https://kpolyakov.spb.ru/school/ege/gen.php?action=viewVar&select={select_id}&answers=on&varId="
-    async with session.get(url) as response:
-        if response.status == 200:
-            return await response.text()
-
-
-async def do():
-    result = dict()
-    async with aiohttp.ClientSession() as session:
-        for task in range(1, 28):
-            if task in (19, 20, 21):
-                continue
-            html = await get_html(session, task)
-            result[task] = parse(html, task)
-    return result
-
-
-def get_variant():
-    loop = asyncio.get_event_loop()
-    return loop.run_until_complete(do())
 
 
 if __name__ == "__main__":
