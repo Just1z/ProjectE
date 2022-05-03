@@ -1,3 +1,4 @@
+import base64
 import os
 import logging
 from datetime import timedelta
@@ -7,6 +8,8 @@ from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api
 from sqlalchemy.sql.expression import func
+from werkzeug.datastructures import FileStorage
+
 from functions import generate_code, normalize_html
 from data import db_session
 from data.users import User
@@ -15,7 +18,7 @@ from data.tasks import Task
 from data.test_sessions import TestSession
 from data import task_resources
 from forms.user import RegisterForm, LoginForm
-
+from forms.task import TaskForm
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
@@ -29,6 +32,20 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+@app.errorhandler(404)
+def error404(error):
+    return render_template(
+        "error.html", title="Ошибка 404",
+        text1="Ошибка 404", text2="Страница не найдена :/")
+
+
+@app.errorhandler(500)
+def error500(error):
+    return render_template(
+        "error.html", title="Ошибка 500",
+        text1="Ошибка 500", text2="Непредвиденная ошибка. Возможно, вы делаете что-то не так.")
 
 
 @login_manager.user_loader
@@ -196,24 +213,40 @@ def show_task(number):
     return render_template("show_task.html", **data)
 
 
+@app.route("/add_task", methods=["GET", "POST"])
+def new_task():
+    form = TaskForm()
+    if request.method == "POST":
+        number = form.number.data
+        condition = form.task.data
+        answer = form.answer.data
+        # TODO form.file1, form.file2
+        file1: FileStorage = form.files.data
+        file2: FileStorage = None
+        images = form.img.data
+        html = f'<p>{condition}</p>'
+        if images.content_length != 0:
+            html += f'<img src="data:image/png,{base64.b64encode(images.stream.read()).decode("utf-8")}/>'
+
+        db_sess = db_session.create_session()
+        task = Task(
+            html=html,
+            answer=answer,
+            files="",  # TODO file1 save, file2 save and format ' files = "" '
+            number=number,
+            author_id=current_user.id
+        )
+        db_sess.add(task)
+        db_sess.commit()
+        return redirect("/")
+
+    return render_template("add_task.html", form=form)
+
+
 @app.route("/")
 @app.route("/index")
 def index():
     return render_template("index.html", title='КЕГЭ')
-
-
-@app.errorhandler(404)
-def error404(error):
-    return render_template(
-        "error.html", title="Ошибка 404",
-        text1="Ошибка 404", text2="Страница не найдена :/")
-
-
-@app.errorhandler(500)
-def error500(error):
-    return render_template(
-        "error.html", title="Ошибка 500",
-        text1="Ошибка 500", text2="Непредвиденная ошибка. Возможно, вы делаете что-то не так.")
 
 
 if __name__ == "__main__":
