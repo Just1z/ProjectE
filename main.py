@@ -1,3 +1,4 @@
+import base64
 import os
 import logging
 from datetime import timedelta
@@ -7,6 +8,8 @@ from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api
 from sqlalchemy.sql.expression import func
+from werkzeug.datastructures import FileStorage
+
 from functions import generate_code, normalize_html
 from data import db_session
 from data.users import User
@@ -15,8 +18,7 @@ from data.tasks import Task
 from data.test_sessions import TestSession
 from data import task_resources
 from forms.user import RegisterForm, LoginForm
-from forms.variants import VariantForm
-
+from forms.task import TaskForm
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
@@ -30,6 +32,20 @@ app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+
+@app.errorhandler(404)
+def error404(error):
+    return render_template(
+        "error.html", title="Ошибка 404",
+        text1="Ошибка 404", text2="Страница не найдена :/")
+
+
+@app.errorhandler(500)
+def error500(error):
+    return render_template(
+        "error.html", title="Ошибка 500",
+        text1="Ошибка 500", text2="Непредвиденная ошибка. Возможно, вы делаете что-то не так.")
 
 
 @login_manager.user_loader
@@ -120,7 +136,6 @@ def generator():
         if var_id:
             tasks = session.query(Variants).filter(Variants.id == var_id).first()
             tasks_ids = list(map(int, tasks.tasks.split(', ')))
-            time = tasks.time
         else:
             for i, count in enumerate(tasks):
                 number = i + 1
@@ -129,10 +144,8 @@ def generator():
                 tasks = session.query(Task).filter(
                     Task.number == number).order_by(func.random()).limit(int(count))
                 tasks_ids.extend(task.id for task in tasks)
-            time = 14100
         flask_session["tasks_ids"] = tasks_ids
         flask_session["var_id"] = "-"
-        flask_session["time"] = time
         return redirect("/test", 301)
     return render_template("generator.html", title="Генератор")
 
@@ -145,7 +158,7 @@ def test(tasks_ids=None):
         else:
             return redirect("/", 304)
     session = db_session.create_session()
-    data = {"tasks": [], "title": "КЕГЭ", "time": flask_session.get("time", 14100), "numbers": [], "count": 0}
+    data = {"tasks": [], "title": "КЕГЭ", "time": 14100, "numbers": [], "count": 0}
     files = []
     answers = []
     tasks = session.query(Task).filter(Task.id.in_(tasks_ids)).all()
@@ -186,21 +199,6 @@ def test(tasks_ids=None):
     return render_template("case.html", **data)
 
 
-@app.route("/add_variant", methods=['GET', 'POST'])
-@login_required
-def add_variant():
-    form = VariantForm()
-    if form.validate_on_submit():
-        session = db_session.create_session()
-        variant = Variants(tasks=', '.join(form.task.raw_data),
-                           time=int(form.time.data) * 60,
-                           author_id=current_user.id)
-        session.add(variant)
-        session.commit()
-        return redirect('/')
-    return render_template('add_variant.html', title='Создание варианта', form=form)
-
-
 @app.route("/task_database")
 def task_database():
     return render_template("task_database.html", title="База заданий")
@@ -225,24 +223,40 @@ def show_task():
         return render_template("show_task.html", **data)
 
 
+@app.route("/add_task", methods=["GET", "POST"])
+def new_task():
+    form = TaskForm()
+    if request.method == "POST":
+        number = form.number.data
+        condition = form.task.data
+        answer = form.answer.data
+        # TODO form.file1, form.file2
+        file1: FileStorage = form.files.data
+        file2: FileStorage = None
+        images = form.img.data
+        html = f'<p>{condition}</p>'
+        if images.content_length != 0:
+            html += f'<img src="data:image/png,{base64.b64encode(images.stream.read()).decode("utf-8")}/>'
+
+        db_sess = db_session.create_session()
+        task = Task(
+            html=html,
+            answer=answer,
+            files="",  # TODO file1 save, file2 save and format ' files = "" '
+            number=number,
+            author_id=current_user.id
+        )
+        db_sess.add(task)
+        db_sess.commit()
+        return redirect("/")
+
+    return render_template("add_task.html", form=form)
+
+
 @app.route("/")
 @app.route("/index")
 def index():
     return render_template("index.html", title='КЕГЭ')
-
-
-@app.errorhandler(404)
-def error404(error):
-    return render_template(
-        "error.html", title="Ошибка 404",
-        text1="Ошибка 404", text2="Страница не найдена :/")
-
-
-@app.errorhandler(500)
-def error500(error):
-    return render_template(
-        "error.html", title="Ошибка 500",
-        text1="Ошибка 500", text2="Непредвиденная ошибка. Возможно, вы делаете что-то не так.")
 
 
 if __name__ == "__main__":

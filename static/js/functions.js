@@ -49,7 +49,7 @@ function Timer(time) {
 
 function changeActiveElementNext() {
     var slidesCount = document.getElementsByClassName("ind").length;
-    var element = document.querySelector("ul > li.active");
+    var element = document.querySelectorAll("ul > li.active")[0];
     if (Number(element.querySelector("button").innerHTML) + 1!=slidesCount) {
         var element_next = element.nextElementSibling;
         element.classList.remove("active");
