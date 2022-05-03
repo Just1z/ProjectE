@@ -49,7 +49,7 @@
     --clip-top: calc(var(--text-height) * var(--index));
     --clip-bottom: calc(var(--text-height) * var(--inverse-index));
     clip-path: inset(var(--clip-top) 0 var(--clip-bottom) 0);
-    animation: text 340ms cubic-bezier(.46,.29,0,1.24) 1 backwards calc(var(--index) * 120ms), glitch 1s ease infinite 1s alternate-reverse;
+    animation: text 340ms cubic-bezier(.46,.29,0,1.24) 1 backwards calc(var(--index) * 120ms), glitch 2s ease infinite 2s alternate-reverse;
   }
   
   .text span:nth-child(odd) { --glitch-translate: 8px; }
