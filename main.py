@@ -1,5 +1,7 @@
 import os
 import logging
+from datetime import timedelta
+from configparser import ConfigParser
 from flask import Flask, render_template, redirect, request, url_for
 from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -20,7 +22,12 @@ db_session.global_init("db/kege.db")
 app = Flask(__name__)
 app.logger.setLevel(logging.INFO)
 api = Api(app)
-app.config["SECRET_KEY"] = "WVJsu7b3pPCzz5EgY8IWTIynZ45XNEAZYULN2mLW"
+
+config = ConfigParser()
+config.read("settings.ini")
+app.config["SECRET_KEY"] = config["settings"]["secret_key"]
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
+
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -120,7 +127,7 @@ def generator():
                 if i >= 19:
                     number += 2
                 tasks = session.query(Task).filter(
-                    Task.number ==number).order_by(func.random()).limit(int(count))
+                    Task.number == number).order_by(func.random()).limit(int(count))
                 tasks_ids.extend(task.id for task in tasks)
             time = 14100
         flask_session["tasks_ids"] = tasks_ids
@@ -141,8 +148,9 @@ def test(tasks_ids=None):
     data = {"tasks": [], "title": "КЕГЭ", "time": flask_session.get("time", 14100), "numbers": [], "count": 0}
     files = []
     answers = []
-    for t_id in tasks_ids:
-        task = session.query(Task).filter(Task.id == t_id).first()
+    tasks = session.query(Task).filter(Task.id.in_(tasks_ids)).all()
+    tasks = [next(t for t in tasks if t.id == t_id) for t_id in tasks_ids]
+    for task in tasks:
         text = normalize_html(task.html)
         ans = task.answer
         file = task.files
@@ -155,10 +163,13 @@ def test(tasks_ids=None):
             data["tasks"].append(text[ind3:].replace('Вопрос 3.', ''))
             answers.extend(ans)
             data["count"] += 3
+            files.extend((None, None))
+            data["numbers"].extend((19, 20, 21))
         else:
             data["tasks"].append(text)
             answers.append(ans)
             data["count"] += 1
+            data["numbers"].append(task.number)
         files.append(file)
     # Заносим сессию в базу данных
     test_session_code = generate_code()  # Код сессии
@@ -168,10 +179,10 @@ def test(tasks_ids=None):
         test_session.setUser(current_user.id)
     session.add(test_session)
     session.commit()
-    files.insert(19, "")
-    files.insert(19, "")
     data["files"] = files
     data["code"] = test_session_code
+    if flask_session.get("var_id"):
+        data["kim_number"] = flask_session.get("var_id")
     return render_template("case.html", **data)
 
 
@@ -195,20 +206,33 @@ def task_database():
     return render_template("task_database.html", title="База заданий")
 
 
+@app.route("/task_database/<int:number>")
+def show_task(number):
+    session = db_session.create_session()
+    tasks = session.query(Task).filter(Task.number == number).order_by(Task.id).all()
+    tasks_data = [[t.id, t.html, t.answer] for t in tasks]
+    data = {"title": f"Задание {number}", "tasks": tasks_data}
+    return render_template("show_task.html", **data)
+
+
 @app.route("/")
 @app.route("/index")
 def index():
     return render_template("index.html", title='КЕГЭ')
 
 
-@app.route('/favicon.ico')
-def favicon():
-    return url_for("static", filename="img/logo.png")
-
-
 @app.errorhandler(404)
-def not_found(error):
-    return render_template("not_found.html", title="Страница не найдена")
+def error404(error):
+    return render_template(
+        "error.html", title="Ошибка 404",
+        text1="Ошибка 404", text2="Страница не найдена :/")
+
+
+@app.errorhandler(500)
+def error500(error):
+    return render_template(
+        "error.html", title="Ошибка 500",
+        text1="Ошибка 500", text2="Непредвиденная ошибка. Возможно, вы делаете что-то не так.")
 
 
 if __name__ == "__main__":

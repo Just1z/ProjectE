@@ -5,6 +5,37 @@
 
 {% block content %}
 <div class="starter-template text-center py-5">
-    <h2>База заданий</h2>
+    <h2 style="margin-top: 20px;">База заданий</h2>
+    <table class="tasks" align="center">
+        <tbody>
+            <script>
+                let id = 1;
+                for (let row = 0; row < 3; row++) {
+                    document.write(`<tr>`);
+                    for (let i = 0; i < 9; i++) {
+                        if (id == 28) {break;}
+                        if (id == 19) {
+                            document.write(`
+                                <td name="_1921_">
+                                    <button type="button" style="width:100%;" class="btn btn-secondary" onclick="location.href='/task_database/${id}'">
+                                        ${id}-21
+                                    </button>
+                                </td>`);
+                            id += 3;
+                        } else {
+                            document.write(`
+                                <td>
+                                    <button type="button" style="width:100%;" class="btn btn-secondary" onclick="location.href='/task_database/${id}'">
+                                        ${id}
+                                    </button>
+                                </td>`);
+                            id++;
+                        }
+                    }
+                    document.write(`</tr>`);
+                }
+            </script>
+        </tbody>
+    </table>
 </div>
 {% endblock %}

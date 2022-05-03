@@ -136,7 +136,15 @@
                         <div class="footer">
                             <div class="attach-files me-auto">
                                 {% if files[i-1] %}
-                                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABkAAAAgCAYAAADnnNMGAAABuElEQVRIie3WvWsUQRgH4OcuZ1QkKxbxi4AoCoKIIVtYWIhic0oiQhrhtlLsFLEQtRECFoJgG0ihsGhlJeJfYLsEazE2agpRYbGKyFnsHJ4Lcpe9TSH6g4VhZnifhXnZncbETAf2oYNJ1bOKh3mWrpUXWtiD19gaNq43EbajiRNRnMyXoRYuhk0H8bYCch0XwotexbMy1MTOMK4C9NLNs/Qa7mM2QOP9yJYRiv+WPEtv4W4ftKmHjJof/XXyLF3A7QA9juJkrFUD8gmHozjZj69hbjHA97BcB/ICl7Hyh/WpkZE8S7/hTBQnh7CttPySooVrSZ6lb8pzUZysUc/BD8x/5O9HJvF8o5HjOL3RSKX8e8gdv35uvRzFlTqReTzFjj4gxdlRkSXsCuNzigvDDcVHNcVHXIIoTtpRnNysgsziVBiv4jy+Y3MAEnwO6ycxVwUppwc9KAEDM+h/0sbu0tyHgIAoTijOqBKyjGPhGSavqiDtYSrnWTpwT1NxpYHGMEXXmTF0m3gfJg7UWT2KkzlMYaUxMdPZq7jHjuNdTUYTRxRNMt1S9Py0omPKnVQ1XTzCkzxLv/wEnRZg9y58XggAAAAASUVORK5CYII=">
+                                    <img src="data:image/png;base64,
+                                    iVBORw0KGgoAAAANSUhEUgAAABkAAAAgCAYAAADnnNMGAAABuElEQVRIie3WvWsUQRgH4OcuZ1QkK
+                                    xbxi4AoCoKIIVtYWIhic0oiQhrhtlLsFLEQtRECFoJgG0ihsGhlJeJfYLsEazE2agpRYbGKyFnsHJ4L
+                                    cpe9TSH6g4VhZnifhXnZncbETAf2oYNJ1bOKh3mWrpUXWtiD19gaNq43EbajiRNRnMyXoRYuhk0H8bYCc
+                                    h0XwotexbMy1MTOMK4C9NLNs/Qa7mM2QOP9yJYRiv+WPEtv4W4ftKmHjJof/XXyLF3A7QA9juJkrFUD8gm
+                                    HozjZj69hbjHA97BcB/ICl7Hyh/WpkZE8S7/hTBQnh7CttPySooVrSZ6lb8pzUZysUc/BD8x/5O9HJvF8o
+                                    5HjOL3RSKX8e8gdv35uvRzFlTqReTzFjj4gxdlRkSXsCuNzigvDDcVHNcVHXIIoTtpRnNysgsziVBiv4jy+
+                                    Y3MAEnwO6ycxVwUppwc9KAEDM+h/0sbu0tyHgIAoTijOqBKyjGPhGSavqiDtYSrnWTpwT1NxpYHGMEXXmTF0m
+                                    3gfJg7UWT2KkzlMYaUxMdPZq7jHjuNdTUYTRxRNMt1S9Py0omPKnVQ1XTzCkzxLv/wEnRZg9y58XggAAAAASUVORK5CYII=">
                                     <script>
                                         document.write('{{ files[i-1]|safe }}');
                                     </script>
@@ -144,6 +152,10 @@
                             </div>
                             <form class="d-flex">
                                 {% if i == 25 %}
+                                <p>
+                                    Если строк в ответе меньше, чем в таблице, оставьте ненужные строки пустыми. 
+                                    Если в каждой строке нужно записать лишь одно число, записывайте числа в колонку 1.
+                                    При несоблюдении этих правил ваш ответ может отличаться от правильного, и вы не получите баллы</p>
                                 <table class="answer me-2">
                                     <tr>
                                         <td style="width:50px;">
