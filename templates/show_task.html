@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/show_task.css')}}"/>
+{% endblock %}
+
+{% block content %}
+<div class="starter-template text-center py-5">
+    <h2 style="margin-top: 20px;">База заданий</h2>
+    {% for task in tasks %}
+    <div class="task">
+        <span>{{ task[0] }}</span>
+        <script>
+            document.write(`{{ task[1]|safe }}`);
+        </script>
+        <br>
+        <p>
+            <a id="p{{task[0]}}" href="javascript:void(0)" onclick="showAnswer({{task[0]}})">Показать ответ</a>
+        </p>
+        <div id="ans_{{task[0]}}" style="display:none;">{{task[2]|safe}}</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

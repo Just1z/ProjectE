@@ -135,9 +135,6 @@ let onInputChange = (id) => {
         checkbox.checked = false;
     } else {checkbox.checked = true;}
     if (!num) {checkbox.checked = false; num = "0"}
-    if (num > 20) {
-        num = "20";
-    }
     input.value = num;
 }
 
@@ -151,4 +148,17 @@ function showAlert() {
         window.location.href = document.getElementById('finishExam').href
     }
     return false
+}
+
+let showAnswer = (id) => {
+    var answer = document.getElementById(`ans_${id}`);
+    var text = document.getElementById(`p${id}`)
+    if (answer.style.display == "none") {
+        answer.style.display = "block";
+        text.textContent = "Скрыть ответ"
+    } else {
+        answer.style.display = "none";
+        text.textContent = "Показать ответ"
+    }
+
 }

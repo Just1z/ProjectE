@@ -1,0 +1,18 @@
+.task {
+    width: 80%;
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.task span {
+    width: 40px;
+    display: inline-block;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid black;
+    margin: 0 10px 5px 0;
+}
+
+.task p {
+    display: inline;
+}
