@@ -1,41 +1,49 @@
 {% extends "base.html" %}
 
 {% block head %}
+
 {% endblock %}
 
 {% block content %}
-<div class="starter-template text-center py-5">
-    <h2 style="margin-top: 20px;">База заданий</h2>
-    <table class="tasks" align="center">
-        <tbody>
-            <script>
-                let id = 1;
-                for (let row = 0; row < 3; row++) {
-                    document.write(`<tr>`);
-                    for (let i = 0; i < 9; i++) {
-                        if (id == 28) {break;}
-                        if (id == 19) {
-                            document.write(`
-                                <td name="_1921_">
-                                    <button type="button" style="width:100%;" class="btn btn-secondary" onclick="location.href='/task_database/${id}'">
-                                        ${id}-21
-                                    </button>
-                                </td>`);
-                            id += 3;
-                        } else {
-                            document.write(`
-                                <td>
-                                    <button type="button" style="width:100%;" class="btn btn-secondary" onclick="location.href='/task_database/${id}'">
-                                        ${id}
-                                    </button>
-                                </td>`);
-                            id++;
-                        }
-                    }
-                    document.write(`</tr>`);
-                }
-            </script>
-        </tbody>
-    </table>
+<div class="py-5">
+    <h2 style="margin-top: 20px; text-align: center;">База заданий</h2>
+    <h4>Все задачи по номеру в КИМ</h4>
+    <p>Вы можете увидеть сразу все задачи, которые есть в базе для заданного номера задания в контрольно-измерительных материалах (КИМ) ЕГЭ по информатике.</p>
+    <div style="display: flex; gap: 20px;">
+        <select id="egeId" style="width:100%;">
+            <option value="1">1. Анализ информационных моделей</option>
+            <option value="2">2. Таблицы истинности логических выражений</option>
+            <option value="3">3. Поиск и сортировка в базах данных</option>
+            <option value="4">4. Кодирование и декодирование данных. Условие Фано</option>
+            <option value="5">5. Анализ алгоритмов для исполнителей</option>
+            <option value="6">6. Анализ программ с циклами</option>
+            <option value="7">7. Кодирование графической и звуковой информации</option>
+            <option value="8">8. Комбинаторика</option>
+            <option value="9">9. Обработка числовой информации в электронных таблицах</option>
+            <option value="10">10. Поиск слова в текстовом документе</option>
+            <option value="11">11. Вычисление количества информации</option>
+            <option value="12">12. Алгоритмы для исполнителей с циклами и ветвлениями</option>
+            <option value="13">13. Количество путей в ориентированном графе</option>
+            <option value="14">14. Позиционные системы счисления</option>
+            <option value="15">15. Истинность логического выражения</option>
+            <option value="16">16. Вычисление значения рекурсивной функции</option>
+            <option value="17">17. Обработка целочисленных данных. Проверка делимости</option>
+            <option value="18">18. Динамическое программирование в электронных таблицах</option>
+            <option value="19">19-21. Теория игр</option>
+            <option value="22">22. Анализ программ с циклами и ветвлениями</option>
+            <option value="23">23. Динамическое программирование (количество программ)</option>
+            <option value="24">24. Обработка символьных строк</option>
+            <option value="25">25. Обработка целочисленных данных. Поиск делителей</option>
+            <option value="26">26. Обработка данных с помощью сортировки</option>
+            <option value="27">27. Обработка потока данных</option>
+        </select>
+        <button type="button" style="width:100%;" class="btn btn-secondary" onclick="return getAllTasks()">Найти все задачи</button>
+    </div>
+    <h4 style="margin-top: 20px;">Показать задачу</h4>
+    <p>Вы можете вывести на экран задачу, если вы знаете её номер в базе данных.</p>
+    <div style="display: flex; gap: 20px;">
+        <input class="answer me-2" style="width:100%;" type="text" placeholder="Номер задачи" id="task_id">
+        <button type="button" style="width: 100%;" class="btn btn-secondary" onclick="return getTask()">Показать задачу</button>
+    </div>
 </div>
 {% endblock %}

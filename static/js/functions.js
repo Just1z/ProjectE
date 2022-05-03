@@ -162,3 +162,15 @@ let showAnswer = (id) => {
     }
 
 }
+
+
+function getAllTasks() {
+    window.location.href = '/task_database/?number=' + document.getElementById("egeId").value;
+    return false;
+  }
+
+
+function getTask() {
+    window.location.href = '/task_database/?id=' + document.getElementById("task_id").value;
+    return false;
+  }

@@ -206,13 +206,23 @@ def task_database():
     return render_template("task_database.html", title="База заданий")
 
 
-@app.route("/task_database/<int:number>")
-def show_task(number):
-    session = db_session.create_session()
-    tasks = session.query(Task).filter(Task.number == number).order_by(Task.id).all()
-    tasks_data = [[t.id, t.html, t.answer] for t in tasks]
-    data = {"title": f"Задание {number}", "tasks": tasks_data}
-    return render_template("show_task.html", **data)
+@app.route("/task_database/")
+def show_task():
+    if request.args.get("number"):
+        number = request.args.get("number")
+        session = db_session.create_session()
+        tasks = session.query(Task).filter(Task.number == number).order_by(Task.id).all()
+        tasks_data = [[t.id, t.html, t.answer] for t in tasks]
+        data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
+        return render_template("show_task.html", **data)
+    elif request.args.get("id"):
+        id = request.args.get("id")
+        session = db_session.create_session()
+        tasks = session.query(Task).filter(Task.id == id).first()
+        number = tasks.number
+        tasks_data = [[tasks.id, tasks.html, tasks.answer]]
+        data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
+        return render_template("show_task.html", **data)
 
 
 @app.route("/")
