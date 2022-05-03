@@ -196,3 +196,4 @@ if __name__ == "__main__":
             collect_task(links[link], link + 3)
         else:
             collect_task(links[link], link + 1)
+    print("Done!")

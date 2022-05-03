@@ -1,9 +1,9 @@
-import base64
 import os
 import logging
+from base64 import b64encode
 from datetime import timedelta
 from configparser import ConfigParser
-from flask import Flask, render_template, redirect, request, url_for
+from flask import Flask, render_template, redirect, request
 from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api
@@ -34,18 +34,27 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+@app.errorhandler(401)
+def error401(error):
+    return render_template(
+        "error.html", title="Не авторизован",
+        text1="Ошибка 401",
+        text2="Зарегистрируйтесь или войдите в свой аккаунт, чтобы просматривать данную страницу.")
+
+
 @app.errorhandler(404)
 def error404(error):
     return render_template(
-        "error.html", title="Ошибка 404",
+        "error.html", title="Не найдено",
         text1="Ошибка 404", text2="Страница не найдена :/")
 
 
 @app.errorhandler(500)
 def error500(error):
     return render_template(
-        "error.html", title="Ошибка 500",
-        text1="Ошибка 500", text2="Непредвиденная ошибка. Возможно, вы делаете что-то не так.")
+        "error.html", title="Ошибка",
+        text1="Ошибка 500",
+        text2="Произошла непредвиденная ошибка. Просим прощения за неудобства.")
 
 
 @login_manager.user_loader
@@ -62,13 +71,13 @@ def register():
             return render_template(
                 'register.html', title='Регистрация', form=form, message="Пароли не совпадают")
         session = db_session.create_session()
-        if session.query(User).filter(User.email == form.email.data).first():
+        if session.query(User).filter(User.login == form.login.data).first():
             return render_template('register.html', title='Регистрация', form=form,
                                    message="Такой пользователь уже есть")
         user = User(
             surname=form.surname.data,
             name=form.name.data,
-            email=form.email.data,
+            login=form.login.data,
         )
         user.set_password(form.password.data)
         session.add(user)
@@ -82,7 +91,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        user = db_sess.query(User).filter(User.login == form.login.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect('/')
@@ -100,22 +109,16 @@ def logout():
 
 
 @app.route("/profile")
+@login_required
 def profile():
     return render_template("profile.html", title='КЕГЭ')
-
-
-@app.route("/case/<int:case_id>")
-def case(case_id):
-    session = db_session.create_session()
-    tasks = session.query(Variants).filter(Variants.id == case_id).first()
-    tasks_ids = list(map(int, tasks.tasks.split(', ')))
-    flask_session["var_id"] = str(case_id)
-    return test(tasks_ids)
 
 
 @app.route("/result/", methods=["GET"])
 def result():
     code = request.args.get("sess")
+    if not code:
+        return redirect("/")
     session = db_session.create_session()
     right_answers = session.query(TestSession).filter(
         TestSession.id == code).first().answers.split(",")
@@ -137,6 +140,7 @@ def generator():
             tasks = session.query(Variants).filter(Variants.id == var_id).first()
             tasks_ids = list(map(int, tasks.tasks.split(', ')))
         else:
+            var_id = "-"
             for i, count in enumerate(tasks):
                 number = i + 1
                 if i >= 19:
@@ -145,7 +149,7 @@ def generator():
                     Task.number == number).order_by(func.random()).limit(int(count))
                 tasks_ids.extend(task.id for task in tasks)
         flask_session["tasks_ids"] = tasks_ids
-        flask_session["var_id"] = "-"
+        flask_session["var_id"] = var_id
         return redirect("/test", 301)
     return render_template("generator.html", title="Генератор")
 
@@ -158,11 +162,11 @@ def test(tasks_ids=None):
         else:
             return redirect("/", 304)
     session = db_session.create_session()
-    data = {"tasks": [], "title": "КЕГЭ", "time": 14100, "numbers": [], "count": 0}
+    data = {"tasks": [], "title": "КЕГЭ", "time": 14100, "numbers": [], "count": 0, "exam": "false"}
     files = []
     answers = []
     tasks = session.query(Task).filter(Task.id.in_(tasks_ids)).all()
-    tasks = [next(t for t in tasks if t.id == t_id) for t_id in tasks_ids]
+    tasks = [next(t for t in tasks if t.id == task_id) for task_id in tasks_ids]
     for task in tasks:
         text = normalize_html(task.html)
         ans = task.answer
@@ -194,8 +198,9 @@ def test(tasks_ids=None):
     session.commit()
     data["files"] = files
     data["code"] = test_session_code
-    if flask_session.get("var_id"):
-        data["kim_number"] = flask_session.get("var_id")
+    data["kim_number"] = flask_session.get("var_id")
+    if data["numbers"] == [i for i in range(1, 28)]:
+        data["exam"] = "true"
     return render_template("case.html", **data)
 
 
@@ -206,24 +211,21 @@ def task_database():
 
 @app.route("/task_database/")
 def show_task():
+    session = db_session.create_session()
     if request.args.get("number"):
         number = request.args.get("number")
-        session = db_session.create_session()
         tasks = session.query(Task).filter(Task.number == number).order_by(Task.id).all()
-        tasks_data = [[t.id, t.html, t.answer] for t in tasks]
-        data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
-        return render_template("show_task.html", **data)
     elif request.args.get("id"):
-        id = request.args.get("id")
-        session = db_session.create_session()
-        tasks = session.query(Task).filter(Task.id == id).first()
+        task_id = request.args.get("id")
+        tasks = session.query(Task).filter(Task.id == task_id).first()
         number = tasks.number
-        tasks_data = [[tasks.id, tasks.html, tasks.answer]]
-        data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
-        return render_template("show_task.html", **data)
+    tasks_data = [[t.id, t.html, t.answer] for t in tasks]
+    data = {"title": f"Задание {number}" if number != 19 else "Задания 19-21", "tasks": tasks_data}
+    return render_template("show_task.html", **data)
 
 
 @app.route("/add_task", methods=["GET", "POST"])
+@login_required
 def new_task():
     form = TaskForm()
     if request.method == "POST":
@@ -236,7 +238,7 @@ def new_task():
         images = form.img.data
         html = f'<p>{condition}</p>'
         if images.content_length != 0:
-            html += f'<img src="data:image/png,{base64.b64encode(images.stream.read()).decode("utf-8")}/>'
+            html += f'<img src="data:image/png,{b64encode(images.stream.read()).decode("utf-8")}/>'
 
         db_sess = db_session.create_session()
         task = Task(

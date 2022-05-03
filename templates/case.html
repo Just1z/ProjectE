@@ -17,7 +17,12 @@
 </head>
 <body>
     <script>
-        localStorage.setItem("test_session", test_session);
+        localStorage.setItem("test_session", `{{code}}`);
+        if ({{exam}}) {
+            localStorage.setItem("exam", "true");
+        } else {
+            localStorage.setItem("exam", "false");
+        }
     </script>
 <nav class="navbar navbar-expand-md navbar-dark bg-dark mb-2">
     <div class="container-fluid">

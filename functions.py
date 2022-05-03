@@ -16,9 +16,9 @@ MNEMONIC_TABLE = {
     '&otimes;': '⊗', '&perp;': '⊥'}
 
 
-def generate_code():
+def generate_code(code_len=25):
     """ Возвращает случайную строку из 25 символов"""
-    return "".join([choice(ALL_CHARS) for i in range(25)])
+    return "".join([choice(ALL_CHARS) for i in range(code_len)])
 
 
 def normalize_html(html_text):
@@ -26,3 +26,7 @@ def normalize_html(html_text):
     for key, value in MNEMONIC_TABLE.items():
         html_text = html_text.replace(key, value)
     return html_text
+
+
+if __name__ == "__main__":
+    print(generate_code(40))

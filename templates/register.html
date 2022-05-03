@@ -23,35 +23,30 @@
     <a class="h2" style="color: #2160A6; text-decoration:none;" href="/">КЕГЭ</a>
     <h1 class="h3 mb-3 font-weight-normal">Регистрация</h1>
     <div>{{ message }}</div>
-    <label for="inputEmail" class="sr-only">Email</label>
-    <p>{{ form.email(class="form-control", type="email", placeholder="Email") }}</p>
-        {% for error in form.email.errors %}
+    <p>{{ form.login(class="form-control", type="login", placeholder="Логин") }}</p>
+        {% for error in form.login.errors %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
             </div>
         {% endfor %}
-    <label for="input" class="sr-only">Имя</label>
     <p>{{ form.name(class="form-control", type="name", placeholder="Имя") }}</p>
         {% for error in form.name.errors %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
             </div>
         {% endfor %}
-    <label for="input" class="sr-only">Фамилия</label>
     <p>{{ form.surname(class="form-control", type="surname", placeholder="Фамилия") }}</p>
         {% for error in form.surname.errors %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
             </div>
         {% endfor %}
-    <label for="inputPassword" class="sr-only">Пароль</label>
     <p>{{ form.password(class="form-control", type="password", placeholder="Пароль") }}</p>
         {% for error in form.password.errors %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
             </div>
         {% endfor %}
-    <label for="inputPassword" class="sr-only">Подтвердите пароль</label>
     <p>{{ form.password_again(class="form-control", type="password", placeholder="Подтвердите пароль") }}</p>
         {% for error in form.password_again.errors %}
             <div class="alert alert-danger" role="alert">

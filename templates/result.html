@@ -4,37 +4,39 @@
 <div class="starter-template text-center py-5 px-3" style="margin-top: 20px;">
     <h2>Результаты</h2>
     <script>
-        var score = 0;
-        var answers = localStorage.getItem('answers');
-        answers = answers.split(",")
-        var right_answers = {{right_answers|safe}};
-        var a = ``;
-        var r_a = ``;
-        for (let i = 0; i < right_answers.length; i++) {
-            a = answers[i];
-            r_a = right_answers[i];
-            if (a.length) {
-                if ([26, 27].indexOf(i+1) != -1) {
-                    a = a.split(" ");
-                    r_a = r_a.split(" ");
-                    if (a[0] == r_a[0] && a[1] == r_a[1]) {
-                        score += 2;
-                    } else if (a[0] == r_a[0] || a[1] == r_a[1]) {
-                        score++;
-                    }
-                } else {
-                    if (a == r_a) {
-                        score++;
+        if (localStorage.getItem("exam") == "true") {
+            var score = 0;
+            var answers = localStorage.getItem('answers');
+            answers = answers.split(",")
+            var right_answers = {{right_answers|safe}};
+            var a = ``;
+            var r_a = ``;
+            for (let i = 0; i < right_answers.length; i++) {
+                a = answers[i];
+                r_a = right_answers[i];
+                if (a.length) {
+                    if ([26, 27].indexOf(i+1) != -1) {
+                        a = a.split(" ");
+                        r_a = r_a.split(" ");
+                        if (a[0] == r_a[0] && a[1] == r_a[1]) {
+                            score += 2;
+                        } else if (a[0] == r_a[0] || a[1] == r_a[1]) {
+                            score++;
+                        }
+                    } else {
+                        if (a == r_a) {
+                            score++;
+                        }
                     }
                 }
             }
+            const table = {
+                0: 0, 1: 7, 2: 14, 3: 20, 4: 27, 5: 34, 6: 40, 7: 43, 8: 46, 9: 48, 10: 51,
+                11: 54, 12: 56, 13: 59, 14: 62, 15: 64, 16: 67, 17: 70, 18: 72, 19: 75, 20: 78,
+                21: 80, 22: 83, 23: 85, 24: 88, 25: 90, 26: 93, 27: 95, 28: 98, 29: 100};
+            document.write(
+                `<b>Первичных баллов: ${score}. В соответствии со шкалой перевода баллов 2022 года: ${table[score]} из 100.</b>`);
         }
-        const table = {
-            0: 0, 1: 7, 2: 14, 3: 20, 4: 27, 5: 34, 6: 40, 7: 43, 8: 46, 9: 48, 10: 51,
-            11: 54, 12: 56, 13: 59, 14: 62, 15: 64, 16: 67, 17: 70, 18: 72, 19: 75, 20: 78,
-            21: 80, 22: 83, 23: 85, 24: 88, 25: 90, 26: 93, 27: 95, 28: 98, 29: 100};
-        document.write(
-            `<b>Первичных баллов: ${score}. В соответствии со шкалой перевода баллов 2022 года: ${table[score]} из 100.</b>`);
     </script>
     <table>
         <tr>
