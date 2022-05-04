@@ -50,9 +50,9 @@
                     <input type="radio" name="tab-btn" id="tab-btn-1" value="" checked>
                     <label for="tab-btn-1">Ваши задачи</label>
                     <input type="radio" name="tab-btn" id="tab-btn-2" value="">
-                    <label for="tab-btn-2">Результаты по вашим вариантам</label>
-                    <div id="content-1">
-                        <table class="table table-hover align-left">
+                    <label for="tab-btn-2">Ваши варианты</label>
+                    <div id="content-1" style="width:fit-content;">
+                        <table class="table table-hover align-left" style="width:auto;">
                             <thead>
                             <tr>
                                 <th width="10%">ID</th>
@@ -61,13 +61,15 @@
                             </tr>
                             </thead>
                             <tbody id="items">
-                            {% for i in range(countOfTasks) %}
+                            {% for task in tasks %}
                             <tr>
-                                <td><a href="../task_database/?id={{ tasks[i][0] }}">{{ tasks[i][0] }}</a></td>
-                                <td><a href="../task_database/?id={{ tasks[i][0] }}">{{ tasks[i][1] }}</a></td>
-                                <td style="display: flex; gap: 5px;">
-                                    <a class="btn btn-light" href="../result/?sess={{code}}">Редактировать</a>
-                                    <a class="btn btn-light" href="../result/?sess={{code}}">Удалить</a>
+                                <td><a href="../task_database/?id={{ task[0] }}">{{ task[0] }}</a></td>
+                                <td style="width:fit-content"><a href="../task_database/?id={{ task[0] }}">{{ task[1]|safe }}</a></td>
+                                <td style="display: flex; flex-direction: column;">
+                                    <a class="btn btn-info" style="width:100%; margin-bottom: 5px;" 
+                                        href="../result/?sess={{code}}">Редактировать</a>
+                                    <a class="btn btn-danger" style="width:100%;" 
+                                        href="../result/?sess={{code}}">Удалить</a>
                                 </td>
                             </tr>
                             {% endfor %}
@@ -75,7 +77,29 @@
                         </table>
                     </div>
                     <div id="content-2">
-                        Содержимое 2...
+                        <table class="table table-hover align-left" style="width:auto;">
+                            <thead>
+                            <tr>
+                                <th width="10%">ID</th>
+                                <th width="50%">Задания</th>
+                                <th width="40%">Инструменты</th>
+                            </tr>
+                            </thead>
+                            <tbody id="items">
+                            {% for variant in variants %}
+                            <tr>
+                                <td><a href="../test/?var_id={{ variant[0] }}">{{ variant[0] }}</a></td>
+                                <td style="width:fit-content"><a href="../test/?var_id={{ variant[0] }}">{{ variant[1]|safe }}</a></td>
+                                <td style="display: flex; flex-direction: column;">
+                                    <a class="btn btn-info" style="width:100%; margin-bottom: 5px;" 
+                                        href="../result/?sess={{code}}">Редактировать</a>
+                                    <a class="btn btn-danger" style="width:100%;" 
+                                        href="../result/?sess={{code}}">Удалить</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>

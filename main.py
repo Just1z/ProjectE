@@ -1,4 +1,3 @@
-import base64
 import os
 import logging
 from base64 import b64encode
@@ -116,7 +115,9 @@ def profile():
     session = db_session.create_session()
     tasks = session.query(Task).filter(Task.author_id == current_user.id).all()
     tasks = [[t.id, t.html] for t in tasks]
-    return render_template("profile.html", title='КЕГЭ', tasks=tasks, countOfTasks=len(tasks))
+    variants = session.query(Variants).filter(Variants.author_id == current_user.id).all()
+    variants = [[v.id, v.tasks] for v in variants]
+    return render_template("profile.html", title='КЕГЭ', tasks=tasks, variants=variants)
 
 
 @app.route("/result/", methods=["GET"])
@@ -170,7 +171,11 @@ def test(tasks_ids=None):
         else:
             return redirect("/", 304)
     session = db_session.create_session()
-    data = {"tasks": [], "title": "КЕГЭ", "time": flask_session.get("time", 14100), "numbers": [], "count": 0}
+    data = {
+        "tasks": [], "title": "КЕГЭ",
+        "time": flask_session.get("time", 14100),
+        "numbers": [], "count": 0, "exam": "false"
+        }
     files = []
     answers = []
     tasks = session.query(Task).filter(Task.id.in_(tasks_ids)).all()
@@ -246,13 +251,16 @@ def new_task():
         number = form.number.data
         if not number.isnumeric():
             message = "Необходимо ввести корректный номер задачи."
-            return render_template("add_task.html", title="Добавить задание", form=form, message=message)
-        if not (1 <= int(number) <= 27):
+            return render_template(
+                "add_task.html", title="Добавить задание", form=form, message=message)
+        if not 1 <= int(number) <= 27:
             message = "Необходимо ввести корректный номер задачи."
-            return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+            return render_template(
+                "add_task.html", title="Добавить задание", form=form, message=message)
         if int(number) in ("20", "21"):
             message = "Для задач по теории игр необходимо указывать в поле 'Номер задачи' номер 19."
-            return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+            return render_template(
+                "add_task.html", title="Добавить задание", form=form, message=message)
 
         condition = form.task.data
         answer = form.answer.data
@@ -261,9 +269,11 @@ def new_task():
         image: FileStorage = form.img.data
         html = f'<p>{condition}</p>'
         if image.filename:
-            if "." not in image.filename or not any(ext in image.filename for ext in ("jpeg", "png", "jpg", "gif", "bmp")):
+            if "." not in image.filename or not any(
+                    ext in image.filename for ext in ("jpeg", "png", "jpg", "gif", "bmp")):
                 message = "Ошибка. Изображение является некорректным."
-                return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+                return render_template(
+                    "add_task.html", title="Добавить задание", form=form, message=message)
             ext = image.filename.split(".")[1]
             image.stream.seek(0)
             html += f'<img src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}/>'
@@ -274,7 +284,8 @@ def new_task():
         if file1.filename:
             if "." not in file1.filename:
                 message = "Ошибка. Файл 1 является некорректным"
-                return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+                return render_template(
+                    "add_task.html", title="Добавить задание", form=form, message=message)
             path = f"db/files/{last_task.id + 1}_"
             with open(path + f"1.{file1.filename.split('.')[1]}", "wb") as dst:
                 file1.stream.seek(0)
@@ -282,13 +293,15 @@ def new_task():
             if file2.filename:
                 if "." not in file2.filename:
                     message = "Ошибка. Файл 2 является некорректным"
-                    return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+                    return render_template(
+                        "add_task.html", title="Добавить задание", form=form, message=message)
                 with open(path + f"2.{file2.filename.split('.')[1]}", "wb") as dst:
                     file2.stream.seek(0)
                     file2.save(dst)
         if not file1.filename and file2.filename:
             message = "Ошибка. Отсутствует файл 1"
-            return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+            return render_template(
+                "add_task.html", title="Добавить задание", form=form, message=message)
         task = Task(
             html=html,
             answer=answer,
