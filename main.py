@@ -39,7 +39,7 @@ login_manager.init_app(app)
 @app.errorhandler(401)
 def error401(error):
     return render_template(
-        "error.html", title="Не авторизован",
+        "error.html", title="Не авторизованы",
         text1="Ошибка 401",
         text2="Зарегистрируйтесь или войдите в свой аккаунт, чтобы просматривать данную страницу.")
 
