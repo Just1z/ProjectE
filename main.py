@@ -232,30 +232,51 @@ def new_task():
         db_sess = db_session.create_session()
 
         number = form.number.data
+        if not number.isnumeric():
+            message = "Необходимо ввести корректный номер задачи."
+            return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+        if not (1 <= int(number) <= 27):
+            message = "Необходимо ввести корректный номер задачи."
+            return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+        if int(number) in ("20", "21"):
+            message = "Для задач по теории игр необходимо указывать в поле 'Номер задачи' номер 19."
+            return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+
         condition = form.task.data
         answer = form.answer.data
         file1: FileStorage = form.file1.data
         file2: FileStorage = form.file2.data
         image: FileStorage = form.img.data
         html = f'<p>{condition}</p>'
-
-        f1stream = file1.stream.read()
-        f2stream = file2.stream.read()
-        imgstream = image.stream.read()
-        if len(imgstream) != 0:
-            html += f'<img src="data:image/png,{b64encode(imgstream).decode("utf-8")}/>'
+        if image.filename:
+            if "." not in image.filename or not any(ext in image.filename for ext in ("jpeg", "png", "jpg", "gif", "bmp")):
+                message = "Ошибка. Изображение является некорректным."
+                return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+            ext = image.filename.split(".")[1]
+            image.stream.seek(0)
+            html += f'<img src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}/>'
 
         files = []
-        if len(f1stream) == 0 and len(f2stream) != 0:
-            pass  # TODO сообщение об ошибке
-        elif len(f1stream) != 0:
-            last_task = db_sess.query(Task).order_by(Task.id)[-1]
+        last_task = db_sess.query(Task).order_by(Task.id)[-1]
+
+        if file1.filename:
+            if "." not in file1.filename:
+                message = "Ошибка. Файл 1 является некорректным"
+                return render_template("add_task.html", title="Добавить задание", form=form, message=message)
             path = f"db/files/{last_task.id + 1}_"
-            file1.save(path + "1." + file1.content_type.split("/")[1])
-            files.append(path + "1." + file1.content_type.split("/")[1])
-            if len(f2stream) != 0:
-                file2.save(path + "2." + file2.content_type.split("/")[1])
-                files.append(path + "2." + file2.content_type.split("/")[1])
+            with open(path + f"1.{file1.filename.split('.')[1]}", "wb") as dst:
+                file1.stream.seek(0)
+                file1.save(dst)
+            if file2.filename:
+                if "." not in file2.filename:
+                    message = "Ошибка. Файл 2 является некорректным"
+                    return render_template("add_task.html", title="Добавить задание", form=form, message=message)
+                with open(path + f"2.{file2.filename.split('.')[1]}", "wb") as dst:
+                    file2.stream.seek(0)
+                    file2.save(dst)
+        if not file1.filename and file2.filename:
+            message = "Ошибка. Отсутствует файл 1"
+            return render_template("add_task.html", title="Добавить задание", form=form, message=message)
         task = Task(
             html=html,
             answer=answer,
@@ -265,8 +286,9 @@ def new_task():
         )
         db_sess.add(task)
         db_sess.commit()
+        app.logger.info(f"{current_user} added new task. Task ID: {last_task.id + 1}")
         return redirect("/task_database")
-    return render_template("add_task.html", form=form)
+    return render_template("add_task.html", title="Добавить задание", form=form)
 
 
 @app.route("/")
