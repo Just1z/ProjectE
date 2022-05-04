@@ -64,14 +64,15 @@ function changeActiveElementNext() {
 
 function changeActiveElementPrevious() {
     var slidesCount = document.getElementsByClassName("ind").length;
-    var element = document.querySelectorAll("ul > li.active")[0];
-    console.log(element.querySelector("button").innerHTML=="i") // Выводит "i"
-    if (element.querySelector("button").innerHTML!=="i") { // Но выполняется это условие
-        var element_prev = element.previousElementSibling;
+    var elements = document.querySelectorAll("ul > li.ind");
+    var element = document.querySelector("ul > li.active");
+    var first_element = elements[0];
+    if (element === first_element) {
+        var element_prev = elements[slidesCount - 1];
         element.classList.remove("active");
         element_prev.classList.add("active");
     } else {
-        var element_prev = document.querySelectorAll("ul > li.ind")[slidesCount];
+        var element_prev = element.previousElementSibling;
         element.classList.remove("active");
         element_prev.classList.add("active");
     }

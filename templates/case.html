@@ -55,14 +55,14 @@
                 <div class="list-group list-group-flush"
                      style="overflow-y: scroll; overflow-x: hidden; max-height: 85vh;">
                     <ul class="nav nav-pills nav-flush flex-column mb-auto text-center indicators">
-                        <li class="nav-item active">
+                        <li class="nav-item ind active">
                             <button data-bs-target="#carouselDark" data-bs-slide-to="0"
                                     class="nav-link border bg-white text-secondary active"
                                     aria-current="true">i
                             </button>
                         </li>
                         {% for i in range(1, count + 1) %}
-                        <li class="nav-item">
+                        <li class="nav-item ind">
                             <button type="button" data-bs-target="#carouselDark" data-bs-slide-to="{{ i }}"
                                     class="nav-link border bg-white text-secondary"
                                     aria-current="true">{{ i }}
@@ -75,7 +75,7 @@
         </div>
         <div class="col-auto max-height align-items-center" style="position: relative;">
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselDark"
-                    data-bs-slide="prev" style="width: 100%;">
+                    data-bs-slide="prev" onclick="changeActiveElementPrevious()" style="width: 100%;">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Previous</span>
             </button>

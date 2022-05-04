@@ -1,3 +1,4 @@
+import base64
 import os
 import logging
 from base64 import b64encode
@@ -19,6 +20,7 @@ from data.test_sessions import TestSession
 from data import task_resources
 from forms.user import RegisterForm, LoginForm
 from forms.task import TaskForm
+from forms.variants import VariantForm
 
 db_session.global_init("db/kege.db")
 app = Flask(__name__)
@@ -139,6 +141,7 @@ def generator():
         if var_id:
             tasks = session.query(Variants).filter(Variants.id == var_id).first()
             tasks_ids = list(map(int, tasks.tasks.split(', ')))
+            time = tasks.time
         else:
             var_id = "-"
             for i, count in enumerate(tasks):
@@ -148,8 +151,10 @@ def generator():
                 tasks = session.query(Task).filter(
                     Task.number == number).order_by(func.random()).limit(int(count))
                 tasks_ids.extend(task.id for task in tasks)
+            time = 14100
         flask_session["tasks_ids"] = tasks_ids
         flask_session["var_id"] = var_id
+        flask_session["time"] = time
         return redirect("/test", 301)
     return render_template("generator.html", title="Генератор")
 
@@ -162,7 +167,7 @@ def test(tasks_ids=None):
         else:
             return redirect("/", 304)
     session = db_session.create_session()
-    data = {"tasks": [], "title": "КЕГЭ", "time": 14100, "numbers": [], "count": 0, "exam": "false"}
+    data = {"tasks": [], "title": "КЕГЭ", "time": flask_session.get("time", 14100), "numbers": [], "count": 0}
     files = []
     answers = []
     tasks = session.query(Task).filter(Task.id.in_(tasks_ids)).all()
@@ -289,6 +294,21 @@ def new_task():
         app.logger.info(f"{current_user} added new task. Task ID: {last_task.id + 1}")
         return redirect("/task_database")
     return render_template("add_task.html", title="Добавить задание", form=form)
+
+
+@app.route("/add_variant", methods=['GET', 'POST'])
+@login_required
+def add_variant():
+    form = VariantForm()
+    if form.validate_on_submit():
+        session = db_session.create_session()
+        variant = Variants(tasks=', '.join(form.task.raw_data),
+                           time=int(form.time.data) * 60,
+                           author_id=current_user.id)
+        session.add(variant)
+        session.commit()
+        return redirect('/')
+    return render_template('add_variant.html', title='Создание варианта', form=form)
 
 
 @app.route("/")
