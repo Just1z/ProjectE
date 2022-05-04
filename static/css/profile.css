@@ -95,3 +95,24 @@ body{
     background-color: #fff;
     border-bottom: 1px solid #fff;
 }
+
+table {
+    table-layout:fixed;
+    height: 400px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border-collapse: separate;
+    width: 400px;
+}
+
+th, td {
+   background: rgba(155, 155, 200, .1);
+}
+td:hover {
+    color: #6699ff;
+    background: rgba(100, 100, 200, .1);
+}
+
+td > a:hover {
+  text-decoration:none;
+}
