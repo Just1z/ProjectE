@@ -52,6 +52,7 @@
                     <input type="radio" name="tab-btn" id="tab-btn-2" value="">
                     <label for="tab-btn-2">Ваши варианты</label>
                     <div id="content-1" style="width:fit-content;">
+                        {% if tasks %}
                         <table class="table table-hover align-left" style="width:fit-content;">
                             <thead>
                             <tr>
@@ -75,8 +76,13 @@
                             {% endfor %}
                             </tbody>
                         </table>
+                        {% else %}
+                        <p>У вас ещё нет своих задач</p>
+                        <a class="btn btn-success" href="../add_task">Добавить задачу</a>
+                        {% endif %}
                     </div>
-                    <div id="content-2"">
+                    <div id="content-2" style="width:fit-content;">
+                        {% if variants %}
                         <table class="table table-hover align-left" style="width:fit-content;">
                             <thead>
                             <tr>
@@ -94,12 +100,16 @@
                                     <a class="btn btn-info" style="width:100%; margin-bottom: 5px;"
                                         href="../variant/{{ variant[0] }}">Редактировать</a>
                                     <a class="btn btn-danger" style="width:100%;"
-                                        href="../result/?sess={{code}}">Удалить</a>
+                                        href="../variant_delete/{{ variant[0] }}">Удалить</a>
                                 </td>
                             </tr>
                             {% endfor %}
                             </tbody>
                         </table>
+                        {% else %}
+                        <p>У вас ещё нет собранных вариантов</p>
+                        <a class="btn btn-success" href="../add_variant">Собрать вариант</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
