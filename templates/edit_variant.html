@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="py-5">
+    <h1 class="text-center">Редактировать вариант</h1>
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.time.label }}<br>
+            {{ form.time(class="form-control") }}<br>
+            {% for error in form.time.errors %}
+        <p content="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
+        </p>
+        <div class="tasks-input">
+        {% for task in tasks %}
+            <div><p>
+                {{ form.task.label }}<br>
+                <input class="form-control" id="task" name="task" required="" type="number" value="{{ task }}"><br>
+                {% for error in form.task.errors %}
+                <p content="alert alert-danger" role="alert">
+                    {{ error }}
+                </p>
+                {% endfor %}
+                </p> </div>
+        {% endfor %}
+        </div>
+        <div style="display: flex; gap: 20px;">
+            <input class="btn btn-primary" id="submit" name="submit" type="submit" value="Сохранить">
+            <a style="color:red;" onclick="return deleteField(this)" href="#">—</a>
+            <a style="color:green;" onclick="return addField()" href="#">+</a>
+            {{message}}
+        </div>
+    </form>
+    <script>
+        var countOfFields = {{ count }};
+        function deleteField(a) {
+            if (countOfFields > 1) {
+                var contDiv = document.querySelector("form > div.tasks-input");
+                contDiv.removeChild(contDiv.lastChild);
+                countOfFields--;
+                }
+            return false;
+            }
+        function addField() {
+            countOfFields++;
+            var div = document.createElement("div");
+            div.innerHTML = '<p>{{ form.task.label }}<br>{{ form.task(class="form-control") }}<br>{% for error in form.task.errors %}<p content="alert alert-danger" role="alert">{{ error }}</p>{% endfor %}</p>';
+            document.querySelector("form > div.tasks-input").appendChild(div);
+            return false;
+            }
+    </script>
+</div>
+{% endblock %}

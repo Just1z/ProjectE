@@ -96,17 +96,17 @@ body{
     border-bottom: 1px solid #fff;
 }
 
-table {
+table.table {
     table-layout:fixed;
-    height: 400px;
+    height: 600px;
+    display: block;
     overflow-y: scroll;
     overflow-x: hidden;
     border-collapse: separate;
-    width: 400px;
 }
 
 th, td {
-   background: rgba(155, 155, 200, .1);
+    background: rgba(155, 155, 200, .1);
 }
 td:hover {
     color: #6699ff;
