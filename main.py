@@ -300,7 +300,7 @@ def new_task():
                     "add_task.html", title="Добавить задание", form=form, message=message)
             ext = image.filename.split(".")[1]
             image.stream.seek(0)
-            html += f'<img src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}/>'
+            html += f'<img src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}"/>'
 
         files = []
         last_task = db_sess.query(Task).order_by(Task.id)[-1]
