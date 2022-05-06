@@ -233,7 +233,7 @@ def show_task():
         else:
             tasks = session.query(Task).filter(
                 Task.number == number, Task.author_id == 0).order_by(Task.id).all()
-        tasks_data = [[t.id, t.html, t.answer] for t in tasks]
+        tasks_data = [[t.id, t.html, t.answer, t.files] for t in tasks]
         if tasks_data:
             data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
             return render_template("show_task.html", **data)
@@ -249,7 +249,7 @@ def show_task():
                 tasks = session.query(Task).filter(Task.id == id, Task.author_id == 0).first()
             if tasks:
                 number = tasks.number
-                tasks_data = [[tasks.id, tasks.html, tasks.answer]]
+                tasks_data = [[tasks.id, tasks.html, tasks.answer, tasks.files]]
                 data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
             else:
                 abort(404)

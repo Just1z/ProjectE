@@ -14,6 +14,10 @@
             document.write(`{{ task[1]|safe }}`);
         </script>
         <br>
+        {% if task[3] %}
+        <div>{{ task[3] }}</div>
+        {% endif %}
+        <br>
         <p>
             <a id="p{{task[0]}}" href="javascript:void(0)" onclick="showAnswer({{task[0]}});">Показать ответ</a>
         </p>
