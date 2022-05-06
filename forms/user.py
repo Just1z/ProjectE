@@ -12,7 +12,7 @@ def login_check(form, field):
 
 
 def password_check(form, field):
-    if not re.fullmatch(r'^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$', field.data):
+    if not re.fullmatch(r'^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z-]{8,30}$', field.data):
         raise ValidationError(
             'Пароль должен состоять из 8-30 символов, и иметь прописные '
             ' и строчные буквы латиницы, а также цифры')
@@ -35,6 +35,6 @@ class RegisterForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     login = StringField('Логин', validators=[DataRequired()])
-    password = PasswordField('Пароль', validators=[DataRequired(), password_check])
+    password = PasswordField('Пароль', validators=[DataRequired()])
     remember_me = BooleanField('Запомнить меня')
     submit = SubmitField('Войти')
