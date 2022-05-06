@@ -1,6 +1,4 @@
-import asyncio
 import re
-import aiohttp
 import requests
 from bs4 import BeautifulSoup
 from base64 import b64encode
