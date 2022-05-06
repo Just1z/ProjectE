@@ -312,7 +312,7 @@ def new_task():
                 message = "Ошибка. Файл 1 является некорректным"
                 return render_template(
                     "add_task.html", title="Добавить задание", form=form, message=message)
-            path = f"templates/files/{last_task.id + 1}_"
+            path = f"files/{last_task.id + 1}_"
             with open(path + f"1.{file1.filename.split('.')[1]}", "wb") as dst:
                 file1.stream.seek(0)
                 file1.save(dst)
@@ -334,7 +334,7 @@ def new_task():
         i = 1
         for file_path in files:
             filename = file_path.split("/")[-1]
-            files_str += f'<a href="../files/{filename}">Файл {i}</a>'
+            files_str += f'<a href="../files/{filename}" target="blank">Файл {i}</a>'
             files_str += " "
             i += 1
         files_str = files_str.strip()
