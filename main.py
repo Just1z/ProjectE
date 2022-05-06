@@ -227,7 +227,8 @@ def show_task():
     if request.args.get("number"):
         number = request.args.get("number")
         session = db_session.create_session()
-        tasks = session.query(Task).filter(Task.number == number).order_by(Task.id).all()
+        tasks = session.query(Task).filter(
+            Task.number == number, Task.author_id == 0).order_by(Task.id).all()
         tasks_data = [[t.id, t.html, t.answer] for t in tasks]
         data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
         return render_template("show_task.html", **data)
@@ -235,17 +236,21 @@ def show_task():
         id = request.args.get("id")
         if len(id.split(',')) == 1:
             session = db_session.create_session()
-            tasks = session.query(Task).filter(Task.id == id).first()
-            number = tasks.number
-            tasks_data = [[tasks.id, tasks.html, tasks.answer]]
-            data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
+            tasks = session.query(Task).filter(Task.id == id, Task.author_id == 0).first()
+            if tasks:
+                number = tasks.number
+                tasks_data = [[tasks.id, tasks.html, tasks.answer]]
+                data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
+            else:
+                abort(404)
         else:
             session = db_session.create_session()
             tasks_data = []
             for i in id.split(','):
-                tasks = session.query(Task).filter(Task.id == i).first()
-                tasks_data.append([tasks.id, tasks.html, tasks.answer])
-            data = {"title": f"Просмотр варианта", "tasks": tasks_data}
+                tasks = session.query(Task).filter(Task.id == i, Task.author_id == 0).first()
+                if tasks:
+                    tasks_data.append([tasks.id, tasks.html, tasks.answer])
+            data = {"title": "Просмотр варианта", "tasks": tasks_data}
         return render_template("show_task.html", **data)
 
 
@@ -363,7 +368,8 @@ def edit_task(id):
                         if "." not in file2.filename:
                             message = "Ошибка. Файл 2 является некорректным"
                             return render_template(
-                                "edit_task.html", title="Добавить задание", form=form, message=message)
+                                "edit_task.html", title="Добавить задание", 
+                                form=form, message=message)
                         with open(path + f"2.{file2.filename.split('.')[1]}", "wb") as dst:
                             file2.stream.seek(0)
                             file2.save(dst)
@@ -413,11 +419,13 @@ def edit_variant(id):
     form = VariantForm()
     if request.method == "GET":
         session = db_session.create_session()
-        variants = session.query(Variants).filter(Variants.id == id, Variants.author_id == current_user.id).first()
+        variants = session.query(Variants).filter(
+            Variants.id == id, Variants.author_id == current_user.id).first()
         if variants:
             tasks = variants.tasks.split(', ')
             form.time.data = variants.time
-            return render_template('edit_variant.html', title='Редактировать вариант', form=form, tasks=tasks, count=len(tasks))
+            return render_template('edit_variant.html', title='Редактировать вариант',
+                form=form, tasks=tasks, count=len(tasks))
         abort(404)
     if form.validate_on_submit():
         session = db_session.create_session()
@@ -436,7 +444,8 @@ def edit_variant(id):
 @login_required
 def variant_delete(id):
     session = db_session.create_session()
-    variant = session.query(Variants).filter(Variants.id == id, Variants.author_id == current_user.id).first()
+    variant = session.query(Variants).filter(
+        Variants.id == id, Variants.author_id == current_user.id).first()
     if variant:
         session.delete(variant)
         session.commit()

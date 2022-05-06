@@ -41,11 +41,13 @@
         </button>
     </div>
     <h4 style="margin-top: 20px;">Показать задачу</h4>
-    <p>Вы можете вывести на экран задачу, если вы знаете её номер в базе данных.</p>
+    <p>Вы можете вывести на экран задачу, если вы знаете её номер в базе данных. 
+       Вы также можете ввести несколько задач через запятую.</p>
     <div style="display: flex; gap: 20px;">
         <input class="answer me-2" style="width:100%;" type="text" placeholder="Номер задачи" id="task_id">
         <button type="button" style="width: 100%;" class="btn btn-secondary" onclick="return getTask()">Показать задачу</button>
     </div>
+    <p>Ошибка 404 означает, что данной задачи нет в базе данных. При выборе нескольких задач недоступные не показываются</p>
     <h4 style="margin-top: 20px;">Добавить задачу в базу заданий</h4>
     <p>Вы можете добавить в базу заданий авторскую задачу с приложением к ней файлов.</p>
     <div style="display: flex; gap: 20px;" align="center">
