@@ -3,7 +3,7 @@ import logging
 from base64 import b64encode
 from datetime import timedelta
 from configparser import ConfigParser
-from flask import Flask, render_template, redirect, request, url_for
+from flask import Flask, render_template, redirect, request, send_file
 from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api, abort
@@ -312,7 +312,7 @@ def new_task():
                 message = "Ошибка. Файл 1 является некорректным"
                 return render_template(
                     "add_task.html", title="Добавить задание", form=form, message=message)
-            path = f"db/files/{last_task.id + 1}_"
+            path = f"templates/files/{last_task.id + 1}_"
             with open(path + f"1.{file1.filename.split('.')[1]}", "wb") as dst:
                 file1.stream.seek(0)
                 file1.save(dst)
@@ -325,7 +325,7 @@ def new_task():
                 with open(path + f"2.{file2.filename.split('.')[1]}", "wb") as dst:
                     file2.stream.seek(0)
                     file2.save(dst)
-                    files.append(path + f"1.{file1.filename.split('.')[1]}")
+                    files.append(path + f"2.{file2.filename.split('.')[1]}")
         if not file1.filename and file2.filename:
             message = "Ошибка. Отсутствует файл 1"
             return render_template(
@@ -333,7 +333,8 @@ def new_task():
         files_str = ""
         i = 1
         for file_path in files:
-            files_str += f'<a href="{file_path}">Файл {i}</a>'
+            filename = file_path.split("/")[-1]
+            files_str += f'<a href="../files/{filename}">Файл {i}</a>'
             files_str += " "
             i += 1
         files_str = files_str.strip()
@@ -383,7 +384,7 @@ def edit_task(id):
                         message = "Ошибка. Файл 1 является некорректным"
                         return render_template(
                             "edit_task.html", title="Добавить задание", form=form, message=message)
-                    path = f"db/files/{last_task.id + 1}_"
+                    path = f"templates/files/{last_task.id + 1}_"
                     with open(path + f"1.{file1.filename.split('.')[1]}", "wb") as dst:
                         file1.stream.seek(0)
                         file1.save(dst)
@@ -400,7 +401,7 @@ def edit_task(id):
                     message = "Ошибка. Отсутствует файл 1"
                     return render_template(
                         "edit_task.html", title="Добавить задание", form=form, message=message)
-                tasks.files = " ".join(map(lambda e: f'<a href="{e}"</a>', files))
+                tasks.files = " ".join(map(lambda e: f'<a href="{e}" target="_blank"></a>', files))
             session.commit()
             return redirect('/profile')
         else:
@@ -481,6 +482,11 @@ def variant_delete(id):
 @app.route("/index")
 def index():
     return render_template("index.html", title='КЕГЭ')
+
+
+@app.route("/files/<filename>")
+def get_file(filename):
+    return send_file(f"files/{filename}")
 
 
 if __name__ == "__main__":
