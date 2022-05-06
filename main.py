@@ -328,10 +328,18 @@ def new_task():
             message = "Ошибка. Отсутствует файл 1"
             return render_template(
                 "add_task.html", title="Добавить задание", form=form, message=message)
+        files_str = ""
+        i = 1
+        for file_path in files:
+            files_str += f'<a href="{file_path}">Файл {i}</a>'
+            files_str += " "
+            i += 1
+        files_str = files_str.strip()
+
         task = Task(
             html=html,
             answer=answer,
-            files=" ".join(map(lambda i, path: f'<a href="{path}">Файл {i}</a>', enumerate(files, 1))),
+            files=files_str,
             number=number,
             author_id=current_user.id
         )
