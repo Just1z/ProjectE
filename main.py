@@ -227,8 +227,12 @@ def show_task():
     if request.args.get("number"):
         number = request.args.get("number")
         session = db_session.create_session()
-        tasks = session.query(Task).filter(
-            Task.number == number, Task.author_id == 0).order_by(Task.id).all()
+        if current_user.is_authenticated:
+            tasks = session.query(Task).filter(
+                Task.number == number, (Task.author_id == 0) | (Task.author_id == current_user.id)).order_by(Task.id).all()
+        else:
+            tasks = session.query(Task).filter(
+                Task.number == number, Task.author_id == 0).order_by(Task.id).all()
         tasks_data = [[t.id, t.html, t.answer] for t in tasks]
         if tasks_data:
             data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
@@ -238,7 +242,11 @@ def show_task():
         id = request.args.get("id")
         if len(id.split(',')) == 1:
             session = db_session.create_session()
-            tasks = session.query(Task).filter(Task.id == id, Task.author_id == 0).first()
+            if current_user.is_authenticated:
+                tasks = session.query(Task).filter(
+                    Task.id == id, (Task.author_id == 0) | (Task.author_id == current_user.id)).first()
+            else:
+                tasks = session.query(Task).filter(Task.id == id, Task.author_id == 0).first()
             if tasks:
                 number = tasks.number
                 tasks_data = [[tasks.id, tasks.html, tasks.answer]]
@@ -338,7 +346,7 @@ def edit_task(id):
     form = TaskForm()
     if request.method == "GET":
         session = db_session.create_session()
-        tasks = session.query(Task).filter(Task.id == id, Task.author_id == current_user).first()
+        tasks = session.query(Task).filter(Task.id == id, Task.author_id == current_user.id).first()
         if tasks:
             form.number.data = tasks.number
             form.task.data = tasks.html
@@ -392,7 +400,7 @@ def edit_task(id):
 @login_required
 def task_delete(id):
     session = db_session.create_session()
-    task = session.query(Task).filter(Task.id == id, Task.author_id == current_user).first()
+    task = session.query(Task).filter(Task.id == id, Task.author_id == current_user.id).first()
     if task:
         session.delete(task)
         session.commit()
