@@ -362,7 +362,7 @@ def edit_task(id):
         tasks = session.query(Task).filter(Task.id == id, Task.author_id == current_user.id).first()
         if tasks:
             form.number.data = tasks.number
-            form.task.data = tasks.html
+            form.task.data = tasks.html[3:-4]
             form.answer.data = tasks.answer
         else:
             abort(404)
@@ -371,11 +371,25 @@ def edit_task(id):
         tasks = session.query(Task).filter(Task.id == id).first()
         if tasks:
             tasks.number = form.number.data
-            tasks.html = form.task.data
             tasks.answer = form.answer.data
-
             file1: FileStorage = form.file1.data
             file2: FileStorage = form.file2.data
+            image: FileStorage = form.img.data
+            condition = form.task.data
+            if condition.startswith("<p>") and condition.endswith("</p>"):
+                html = condition
+            else:
+                html = f"<p>{condition}</p>"
+            if image.filename:
+                if "." not in image.filename or not any(
+                        ext in image.filename for ext in ("jpeg", "png", "jpg", "gif", "bmp")):
+                    message = "Ошибка. Изображение является некорректным."
+                    return render_template(
+                        "add_task.html", title="Добавить задание", form=form, message=message)
+                ext = image.filename.split(".")[1]
+                image.stream.seek(0)
+                html += f'<img max-width=500px src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}"/>'
+
             files = []
             last_task = session.query(Task).order_by(Task.id)[-1]
             if file1.filename or file2.filename:
@@ -384,10 +398,11 @@ def edit_task(id):
                         message = "Ошибка. Файл 1 является некорректным"
                         return render_template(
                             "edit_task.html", title="Добавить задание", form=form, message=message)
-                    path = f"templates/files/{last_task.id + 1}_"
+                    path = f"files/{last_task.id + 1}_"
                     with open(path + f"1.{file1.filename.split('.')[1]}", "wb") as dst:
                         file1.stream.seek(0)
                         file1.save(dst)
+                        files.append(path + f"1.{file1.filename.split('.')[1]}")
                     if file2.filename:
                         if "." not in file2.filename:
                             message = "Ошибка. Файл 2 является некорректным"
@@ -397,11 +412,21 @@ def edit_task(id):
                         with open(path + f"2.{file2.filename.split('.')[1]}", "wb") as dst:
                             file2.stream.seek(0)
                             file2.save(dst)
+                            files.append(path + f"2.{file2.filename.split('.')[1]}")
                 if not file1.filename and file2.filename:
                     message = "Ошибка. Отсутствует файл 1"
                     return render_template(
                         "edit_task.html", title="Добавить задание", form=form, message=message)
-                tasks.files = " ".join(map(lambda e: f'<a href="{e}" target="_blank"></a>', files))
+                files_str = ""
+                i = 1
+                for file_path in files:
+                    filename = file_path.split("/")[-1]
+                    files_str += f'<a href="../files/{filename}" target="blank">Файл {i}</a>'
+                    files_str += " "
+                    i += 1
+                files_str = files_str.strip()
+                tasks.files = files_str
+                tasks.html = html
             session.commit()
             return redirect('/profile')
         else:
