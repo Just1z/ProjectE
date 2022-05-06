@@ -3,7 +3,7 @@ import logging
 from base64 import b64encode
 from datetime import timedelta
 from configparser import ConfigParser
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, url_for
 from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api, abort
@@ -253,7 +253,8 @@ def show_task():
                 number = tasks.number
                 tasks_data = [[tasks.id, tasks.html, tasks.answer, tasks.files]]
                 data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
-            return abort(404)
+            else:
+                return abort(404)
         else:
             session = db_session.create_session()
             tasks_data = []
