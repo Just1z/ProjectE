@@ -20,7 +20,7 @@ def password_check(form, field):
 
 
 def name_check(form, field):
-    if not fullmatch(r'^[А-Яа-яёЁ]{2,}$', field.data):
+    if not fullmatch(r'^[А-Яа-яёЁ-]{2,}$', field.data):
         raise ValidationError('Имя должно состоять только из букв кириллицы')
 
 

@@ -35,6 +35,14 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+@app.errorhandler(400)
+def error401(error):
+    return render_template(
+        "error.html", title="Ошибка запроса",
+        text1="Ошибка 400",
+        text2="Cервер обнаружил в вашем запросе синтаксическую ошибку. Попробуйте")
+
+
 @app.errorhandler(401)
 def error401(error):
     return render_template(

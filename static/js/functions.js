@@ -80,20 +80,19 @@ function changeActiveElementPrevious() {
 
 
 let save_answer = (number) => {
-    if (number == 25) {
-        var answers25 = document.getElementsByName("input_25");
+    var answer_elem = document.getElementsByName(`ans_${number}`)[0];
+    if (answer_elem.tagName == `table`) {
         var answer = ``;
-        for (let i = 0; i < answers25.length; i+=2) {
-            if (answers25[i].value && answers25[i+1].value) {
-                answer += `${answers25[i].value} ${answers25[i+1].value}<br/>`;
-            } else if (answers25[i].value) {
-                answer += `${answers25[i].value}<br/>`;
+        for (let i = 0; i < answer.length; i+=2) {
+            if (answer[i].value && answer[i+1].value) {
+                answer += `${answer[i].value} ${answer[i+1].value}<br/>`;
+            } else if (answer[i].value) {
+                answer += `${answer[i].value}<br/>`;
             }
         }
         answer = answer.slice(0, -5);
-    }
-    else {
-        var answer = document.getElementsByClassName('answer me-2')[number-1].value;
+    } else {
+        var answer = answer_elem.value;
     }
     var answers = localStorage.getItem('answers');
     if (!answers) {
@@ -101,6 +100,9 @@ let save_answer = (number) => {
             "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
     } else {
         answers = answers.split(",")
+    }
+    while (answers.length < number) {
+        answers.push("");
     }
     answers[number-1] = answer;
     localStorage.setItem("answers", answers);

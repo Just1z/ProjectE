@@ -161,7 +161,7 @@
                                     Если строк в ответе меньше, чем в таблице, оставьте ненужные строки пустыми. 
                                     Если в каждой строке нужно записать лишь одно число, записывайте числа в колонку 1.
                                     При несоблюдении этих правил ваш ответ может отличаться от правильного, и вы не получите баллы</p>
-                                <table class="answer me-2">
+                                <table class="answer me-2" name="ans_{{ i }}">
                                     <tr>
                                         <td style="width:50px;">
                                             <span>&nbsp;</span>
@@ -181,17 +181,17 @@
                                                         <span>${i}</span>
                                                     </td>
                                                     <td style="width:200px;">
-                                                        <input class="answer me-25" name="input_25" type="text" id="25_${i}_1">
+                                                        <input class="answer me-2" name="input_25" type="text" id="25_${i}_1">
                                                     </td>
                                                     <td style="width:200px;">
-                                                        <input class="answer me-25" name="input_25" type="text" id="25_${i}_2">
+                                                        <input class="answer me-2" name="input_25" type="text" id="25_${i}_2">
                                                     </td>
                                                 </tr>`)
                                         }
                                     </script>
                                 </table>
                                 {% else %}
-                                    <input class="answer me-2" type="text" aria-label="save-answer" id="{{ i }}">
+                                    <input class="answer me-2" type="text" aria-label="save-answer" id="{{ i }}" name="ans_{{ i }}">
                                 {% endif %}
                                 <button class="btn btn-outline-dark answer" type="button" id="submit"
                                         onclick="save_answer({{i}});">Сохранить ответ
