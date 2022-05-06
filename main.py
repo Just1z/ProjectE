@@ -303,6 +303,7 @@ def new_task():
             with open(path + f"1.{file1.filename.split('.')[1]}", "wb") as dst:
                 file1.stream.seek(0)
                 file1.save(dst)
+                files.append(path + f"1.{file1.filename.split('.')[1]}")
             if file2.filename:
                 if "." not in file2.filename:
                     message = "Ошибка. Файл 2 является некорректным"
@@ -311,6 +312,7 @@ def new_task():
                 with open(path + f"2.{file2.filename.split('.')[1]}", "wb") as dst:
                     file2.stream.seek(0)
                     file2.save(dst)
+                    files.append(path + f"1.{file1.filename.split('.')[1]}")
         if not file1.filename and file2.filename:
             message = "Ошибка. Отсутствует файл 1"
             return render_template(
