@@ -70,11 +70,11 @@ def register():
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
             return render_template(
-                'register.html', title='Регистрация', form=form, message="Пароли не совпадают")
+                'register.html', title='Регистрация', form=form, error_message="Пароли не совпадают")
         session = db_session.create_session()
         if session.query(User).filter(User.login == form.login.data).first():
             return render_template('register.html', title='Регистрация', form=form,
-                                   message="Такой пользователь уже есть")
+                                   error_message="Такой пользователь уже есть")
         user = User(
             surname=form.surname.data,
             name=form.name.data,
@@ -97,7 +97,7 @@ def login():
             login_user(user, remember=form.remember_me.data)
             return redirect('/')
         return render_template('login.html',
-                               message="Неправильный логин или пароль",
+                               error_message="Неправильный логин или пароль",
                                form=form, title='Вход')
     return render_template('login.html', title='Вход', form=form)
 
@@ -230,8 +230,10 @@ def show_task():
         tasks = session.query(Task).filter(
             Task.number == number, Task.author_id == 0).order_by(Task.id).all()
         tasks_data = [[t.id, t.html, t.answer] for t in tasks]
-        data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
-        return render_template("show_task.html", **data)
+        if tasks_data:
+            data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
+            return render_template("show_task.html", **data)
+        return abort(404)
     elif request.args.get("id"):
         id = request.args.get("id")
         if len(id.split(',')) == 1:
@@ -252,6 +254,7 @@ def show_task():
                     tasks_data.append([tasks.id, tasks.html, tasks.answer])
             data = {"title": "Просмотр варианта", "tasks": tasks_data}
         return render_template("show_task.html", **data)
+    return redirect("/task_database")
 
 
 @app.route("/add_task", methods=["GET", "POST"])

@@ -22,7 +22,6 @@
     {{ form.hidden_tag() }}
     <a class="h2" style="color: #2160A6; text-decoration:none;" href="/">КЕГЭ</a>
     <h1 class="h3 mb-3 font-weight-normal">Войдите</h1>
-    <div>{{ message }}</div>
     <p>{{ form.login(class="form-control", type="login", placeholder="Логин") }}</p>
         {% for error in form.login.errors %}
             <div class="alert alert-danger" role="alert">
@@ -38,6 +37,9 @@
     <div class="checkbox">
         <label>{{ form.remember_me() }} {{ form.remember_me.label }}</label>
     </div>
+    {% if error_message %}
+        <div class="alert alert-danger" role="alert">{{ error_message }}</div>
+    {% endif %}
     <div class="btn-submit">{{ form.submit(type="submit", class="btn btn-primary") }}</div>
 </form>
 </body>
