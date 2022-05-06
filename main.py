@@ -144,6 +144,8 @@ def generator():
         tasks_ids = []
         if var_id:
             tasks = session.query(Variants).filter(Variants.id == var_id).first()
+            if not tasks:
+                abort(404)
             tasks_ids = list(map(int, tasks.tasks.split(', ')))
             time = tasks.time
         else:
@@ -251,8 +253,7 @@ def show_task():
                 number = tasks.number
                 tasks_data = [[tasks.id, tasks.html, tasks.answer, tasks.files]]
                 data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
-            else:
-                abort(404)
+            return abort(404)
         else:
             session = db_session.create_session()
             tasks_data = []
