@@ -331,7 +331,7 @@ def new_task():
         task = Task(
             html=html,
             answer=answer,
-            files=" ".join(map(lambda e: f'<a href="{e}"</a>', files)),
+            files=" ".join(map(lambda i, path: f'<a href="{path}">Файл {i}</a>', enumerate(files, 1))),
             number=number,
             author_id=current_user.id
         )
