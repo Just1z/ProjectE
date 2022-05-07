@@ -36,21 +36,15 @@ login_manager.init_app(app)
 
 
 @app.errorhandler(400)
-def error401(error):
+def error400(error):
     return render_template(
         "error.html", title="Ошибка запроса",
-        text1="Ошибка 400",
-        text2="Cервер обнаружил в вашем запросе синтаксическую ошибку. Попробуйте")
+        text1="Некорректный запрос",
+        text2="Cервер обнаружил в вашем запросе синтаксическую ошибку")
 
 
 @app.errorhandler(401)
-def error401(error):
-    return render_template(
-        "error.html", title="Не авторизованы",
-        text1="Ошибка 401",
-        text2="Зарегистрируйтесь или войдите в свой аккаунт, чтобы просматривать данную страницу.")
-
-
+@app.errorhandler(403)
 @app.errorhandler(404)
 def error404(error):
     return render_template(
@@ -62,7 +56,7 @@ def error404(error):
 def error500(error):
     return render_template(
         "error.html", title="Ошибка",
-        text1="Ошибка 500",
+        text1="Ошибка!",
         text2="Произошла непредвиденная ошибка. Просим прощения за неудобства.")
 
 
