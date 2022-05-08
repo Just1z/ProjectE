@@ -10,7 +10,7 @@ from flask_restful import Api, abort
 from sqlalchemy.sql.expression import func
 from werkzeug.datastructures import FileStorage
 
-from functions import generate_code, normalize_html
+from functions import generate_code, normalize_html, does_fit
 from data import db_session
 from data.users import User
 from data.variants import Variants
@@ -271,7 +271,7 @@ def show_task():
 
 @app.route("/add_task", methods=["GET", "POST"])
 @login_required
-def new_task():
+def new_task(max_size=2048):
     form = TaskForm()
     if request.method == "POST":
         db_sess = db_session.create_session()
@@ -302,9 +302,13 @@ def new_task():
                 message = "Ошибка. Изображение является некорректным."
                 return render_template(
                     "add_task.html", title="Добавить задание", form=form, message=message)
+            if not does_fit(image, max_size):
+                message = f"Ошибка. Изображение превышает допустимый размер ({max_size} кбайт)."
+                return render_template(
+                    "add_task.html", title="Добавить задание", form=form, message=message)
             ext = image.filename.split(".")[1]
             image.stream.seek(0)
-            html += f'<img max-width=500px src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}"/>'
+            html += f'<br><img width="350px" src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}"/>'
 
         files = []
         last_task = db_sess.query(Task).order_by(Task.id)[-1]
@@ -312,6 +316,10 @@ def new_task():
         if file1.filename:
             if "." not in file1.filename:
                 message = "Ошибка. Файл 1 является некорректным"
+                return render_template(
+                    "add_task.html", title="Добавить задание", form=form, message=message)
+            if not does_fit(file1, max_size):
+                message = f"Ошибка. Файл 1 превышает допустимый размер ({max_size} кбайт)."
                 return render_template(
                     "add_task.html", title="Добавить задание", form=form, message=message)
             path = f"files/{last_task.id + 1}_"
@@ -322,6 +330,10 @@ def new_task():
             if file2.filename:
                 if "." not in file2.filename:
                     message = "Ошибка. Файл 2 является некорректным"
+                    return render_template(
+                        "add_task.html", title="Добавить задание", form=form, message=message)
+                if not does_fit(file2, max_size):
+                    message = f"Ошибка. Файл 2 превышает допустимый размер ({max_size} кбайт)."
                     return render_template(
                         "add_task.html", title="Добавить задание", form=form, message=message)
                 with open(path + f"2.{file2.filename.split('.')[1]}", "wb") as dst:
@@ -387,10 +399,10 @@ def edit_task(id):
                         ext in image.filename for ext in ("jpeg", "png", "jpg", "gif", "bmp")):
                     message = "Ошибка. Изображение является некорректным."
                     return render_template(
-                        "add_task.html", title="Добавить задание", form=form, message=message)
+                        "edit_task.html", title="Добавить задание", form=form, message=message)
                 ext = image.filename.split(".")[1]
                 image.stream.seek(0)
-                html += f'<img max-width=500px src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}"/>'
+                html += f'<img width="350px" src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}"/>'
 
             files = []
             last_task = session.query(Task).order_by(Task.id)[-1]
@@ -466,7 +478,7 @@ def add_variant():
                            author_id=current_user.id)
         session.add(variant)
         session.commit()
-        return redirect('/')
+        return redirect('/profile')
     return render_template('add_variant.html', title='Создание варианта', form=form)
 
 

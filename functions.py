@@ -1,5 +1,8 @@
 """ В этом файле находятся функции, используемые в main.py"""
+import os
 from random import choice
+
+from werkzeug.datastructures import FileStorage
 
 ALL_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 MNEMONIC_TABLE = {
@@ -26,6 +29,15 @@ def normalize_html(html_text):
     for key, value in MNEMONIC_TABLE.items():
         html_text = html_text.replace(key, value)
     return html_text
+
+
+def does_fit(file: FileStorage, limit: int | float = float("inf")):
+    """Проверяет, вместится ли файл в указанный размер в килобайтах"""
+    file.seek(0, os.SEEK_END)
+    size = file.tell() / 1024  # кбайт
+    file.seek(0)
+    print(size, limit)
+    return size <= limit
 
 
 if __name__ == "__main__":
