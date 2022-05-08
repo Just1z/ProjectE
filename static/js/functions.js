@@ -81,15 +81,17 @@ function changeActiveElementPrevious() {
 
 let save_answer = (number) => {
     var answer_elem = document.getElementsByName(`ans_${number}`)[0];
-    if (answer_elem.tagName == `table`) {
+    if (answer_elem.tagName == `TABLE`) {
         var answer = ``;
-        document.getElementsByName(`input_25`).forEach(element => {
-            if (element.value && answer[i+1].value) {
-                answer += `${element.value} ${answer[i+1].value}<br/>`;
-            } else if (element.value) {
-                answer += `${element.value}<br/>`;
+        inputs1 = document.getElementsByName(`input_${number}_1`);
+        inputs2 = document.getElementsByName(`input_${number}_2`);
+        for (let i = 0; i < 12; i++) {
+            if (inputs1[i].value && inputs2[i].value) {
+                answer += `${inputs1[i].value} ${inputs2[i].value}<br/>`;
+            } else if (inputs1[i].value) {
+                answer += `${inputs1[i].value}<br/>`;
             }
-        });
+        }
         answer = answer.slice(0, -5);
     } else {
         var answer = answer_elem.value;

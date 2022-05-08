@@ -123,7 +123,7 @@
                     </div>
                     {% for i in range(1, count + 1) %}
                     <div class="carousel-item">
-                        {% if i == 25 %}
+                        {% if numbers[i-1] == 25 %}
                         <div class="card" style="height: 45vh;">
                         {% else %}
                         <div class="card">
@@ -156,7 +156,7 @@
                                 {% endif %}
                             </div>
                             <form class="d-flex">
-                                {% if i == 25 %}
+                                {% if numbers[i-1] == 25 %}
                                 <p>
                                     Если строк в ответе меньше, чем в таблице, оставьте ненужные строки пустыми. 
                                     Если в каждой строке нужно записать лишь одно число, записывайте числа в колонку 1.
@@ -181,10 +181,10 @@
                                                         <span>${i}</span>
                                                     </td>
                                                     <td style="width:200px;">
-                                                        <input class="answer me-2" name="input_25" type="text" id="25_${i}_1">
+                                                        <input class="answer me-2" name="input_{{ i }}_1" type="text" id="{{ i }}">
                                                     </td>
                                                     <td style="width:200px;">
-                                                        <input class="answer me-2" name="input_25" type="text" id="25_${i}_2">
+                                                        <input class="answer me-2" name="input_{{ i }}_2" type="text" id="{{ i }}">
                                                     </td>
                                                 </tr>`)
                                         }
