@@ -455,7 +455,9 @@ def add_variant():
     form = VariantForm()
     if form.validate_on_submit():
         session = db_session.create_session()
-        variant = Variants(tasks=', '.join(form.task.raw_data),
+        tasks = session.query(Task).filter(Task.id.in_(form.task.raw_data)).all()
+        tasks = [next(t for t in tasks if t.id == task_id) for task_id in form.task.raw_data]
+        variant = Variants(tasks=', '.join(task.id for task in tasks),
                            time=int(form.time.data) * 60,
                            author_id=current_user.id)
         session.add(variant)
@@ -482,7 +484,9 @@ def edit_variant(id):
         session = db_session.create_session()
         variants = session.query(Variants).filter(Variants.id == id).first()
         if variants:
-            variants.tasks = ', '.join(form.task.raw_data)
+            tasks = session.query(Task).filter(Task.id.in_(form.task.raw_data)).all()
+            tasks = [next(t for t in tasks if t.id == task_id) for task_id in form.task.raw_data]
+            variants.tasks = ', '.join(task.id for task in tasks)
             variants.time = form.time.data
             session.commit()
             return redirect('/profile')

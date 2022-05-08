@@ -83,13 +83,13 @@ let save_answer = (number) => {
     var answer_elem = document.getElementsByName(`ans_${number}`)[0];
     if (answer_elem.tagName == `table`) {
         var answer = ``;
-        for (let i = 0; i < answer.length; i+=2) {
-            if (answer[i].value && answer[i+1].value) {
-                answer += `${answer[i].value} ${answer[i+1].value}<br/>`;
-            } else if (answer[i].value) {
-                answer += `${answer[i].value}<br/>`;
+        document.getElementsByName(`input_25`).forEach(element => {
+            if (element.value && answer[i+1].value) {
+                answer += `${element.value} ${answer[i+1].value}<br/>`;
+            } else if (element.value) {
+                answer += `${element.value}<br/>`;
             }
-        }
+        });
         answer = answer.slice(0, -5);
     } else {
         var answer = answer_elem.value;
