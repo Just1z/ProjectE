@@ -3,14 +3,14 @@ import logging
 from base64 import b64encode
 from datetime import timedelta
 from configparser import ConfigParser
-from flask import Flask, render_template, redirect, request
+from flask import Flask, render_template, redirect, request, send_file
 from flask import session as flask_session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from flask_restful import Api, abort
 from sqlalchemy.sql.expression import func
 from werkzeug.datastructures import FileStorage
 
-from functions import generate_code, normalize_html
+from functions import generate_code, normalize_html, does_fit
 from data import db_session
 from data.users import User
 from data.variants import Variants
@@ -35,14 +35,16 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
-@app.errorhandler(401)
-def error401(error):
+@app.errorhandler(400)
+def error400(error):
     return render_template(
-        "error.html", title="Не авторизованы",
-        text1="Ошибка 401",
-        text2="Зарегистрируйтесь или войдите в свой аккаунт, чтобы просматривать данную страницу.")
+        "error.html", title="Ошибка запроса",
+        text1="Некорректный запрос",
+        text2="Cервер обнаружил в вашем запросе синтаксическую ошибку")
 
 
+@app.errorhandler(401)
+@app.errorhandler(403)
 @app.errorhandler(404)
 def error404(error):
     return render_template(
@@ -54,7 +56,7 @@ def error404(error):
 def error500(error):
     return render_template(
         "error.html", title="Ошибка",
-        text1="Ошибка 500",
+        text1="Ошибка!",
         text2="Произошла непредвиденная ошибка. Просим прощения за неудобства.")
 
 
@@ -70,11 +72,11 @@ def register():
     if form.validate_on_submit():
         if form.password.data != form.password_again.data:
             return render_template(
-                'register.html', title='Регистрация', form=form, message="Пароли не совпадают")
+                'register.html', title='Регистрация', form=form, error_message="Пароли не совпадают")
         session = db_session.create_session()
         if session.query(User).filter(User.login == form.login.data).first():
             return render_template('register.html', title='Регистрация', form=form,
-                                   message="Такой пользователь уже есть")
+                                   error_message="Такой пользователь уже есть")
         user = User(
             surname=form.surname.data,
             name=form.name.data,
@@ -97,7 +99,7 @@ def login():
             login_user(user, remember=form.remember_me.data)
             return redirect('/')
         return render_template('login.html',
-                               message="Неправильный логин или пароль",
+                               error_message="Неправильный логин или пароль",
                                form=form, title='Вход')
     return render_template('login.html', title='Вход', form=form)
 
@@ -144,6 +146,8 @@ def generator():
         tasks_ids = []
         if var_id:
             tasks = session.query(Variants).filter(Variants.id == var_id).first()
+            if not tasks:
+                abort(404)
             tasks_ids = list(map(int, tasks.tasks.split(', ')))
             time = tasks.time
         else:
@@ -227,22 +231,32 @@ def show_task():
     if request.args.get("number"):
         number = request.args.get("number")
         session = db_session.create_session()
-        tasks = session.query(Task).filter(
-            Task.number == number, Task.author_id == 0).order_by(Task.id).all()
-        tasks_data = [[t.id, t.html, t.answer] for t in tasks]
-        data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
-        return render_template("show_task.html", **data)
+        if current_user.is_authenticated:
+            tasks = session.query(Task).filter(
+                Task.number == number, (Task.author_id == 0) | (Task.author_id == current_user.id)).order_by(Task.id).all()
+        else:
+            tasks = session.query(Task).filter(
+                Task.number == number, Task.author_id == 0).order_by(Task.id).all()
+        tasks_data = [[t.id, t.html, t.answer, t.files] for t in tasks]
+        if tasks_data:
+            data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
+            return render_template("show_task.html", **data)
+        return abort(404)
     elif request.args.get("id"):
         id = request.args.get("id")
         if len(id.split(',')) == 1:
             session = db_session.create_session()
-            tasks = session.query(Task).filter(Task.id == id, Task.author_id == 0).first()
+            if current_user.is_authenticated:
+                tasks = session.query(Task).filter(
+                    Task.id == id, (Task.author_id == 0) | (Task.author_id == current_user.id)).first()
+            else:
+                tasks = session.query(Task).filter(Task.id == id, Task.author_id == 0).first()
             if tasks:
                 number = tasks.number
-                tasks_data = [[tasks.id, tasks.html, tasks.answer]]
+                tasks_data = [[tasks.id, tasks.html, tasks.answer, tasks.files]]
                 data = {"title": f"Задание {number if 19 != number else '19-21'}", "tasks": tasks_data}
             else:
-                abort(404)
+                return abort(404)
         else:
             session = db_session.create_session()
             tasks_data = []
@@ -252,11 +266,12 @@ def show_task():
                     tasks_data.append([tasks.id, tasks.html, tasks.answer])
             data = {"title": "Просмотр варианта", "tasks": tasks_data}
         return render_template("show_task.html", **data)
+    return redirect("/task_database")
 
 
 @app.route("/add_task", methods=["GET", "POST"])
 @login_required
-def new_task():
+def new_task(max_size=2048):
     form = TaskForm()
     if request.method == "POST":
         db_sess = db_session.create_session()
@@ -287,9 +302,13 @@ def new_task():
                 message = "Ошибка. Изображение является некорректным."
                 return render_template(
                     "add_task.html", title="Добавить задание", form=form, message=message)
+            if not does_fit(image, max_size):
+                message = f"Ошибка. Изображение превышает допустимый размер ({max_size} кбайт)."
+                return render_template(
+                    "add_task.html", title="Добавить задание", form=form, message=message)
             ext = image.filename.split(".")[1]
             image.stream.seek(0)
-            html += f'<img src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}/>"'
+            html += f'<br><img width="350px" src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}"/>'
 
         files = []
         last_task = db_sess.query(Task).order_by(Task.id)[-1]
@@ -299,7 +318,11 @@ def new_task():
                 message = "Ошибка. Файл 1 является некорректным"
                 return render_template(
                     "add_task.html", title="Добавить задание", form=form, message=message)
-            path = f"db/files/{last_task.id + 1}_"
+            if not does_fit(file1, max_size):
+                message = f"Ошибка. Файл 1 превышает допустимый размер ({max_size} кбайт)."
+                return render_template(
+                    "add_task.html", title="Добавить задание", form=form, message=message)
+            path = f"files/{last_task.id + 1}_"
             with open(path + f"1.{file1.filename.split('.')[1]}", "wb") as dst:
                 file1.stream.seek(0)
                 file1.save(dst)
@@ -309,18 +332,31 @@ def new_task():
                     message = "Ошибка. Файл 2 является некорректным"
                     return render_template(
                         "add_task.html", title="Добавить задание", form=form, message=message)
+                if not does_fit(file2, max_size):
+                    message = f"Ошибка. Файл 2 превышает допустимый размер ({max_size} кбайт)."
+                    return render_template(
+                        "add_task.html", title="Добавить задание", form=form, message=message)
                 with open(path + f"2.{file2.filename.split('.')[1]}", "wb") as dst:
                     file2.stream.seek(0)
                     file2.save(dst)
-                    files.append(path + f"1.{file1.filename.split('.')[1]}")
+                    files.append(path + f"2.{file2.filename.split('.')[1]}")
         if not file1.filename and file2.filename:
             message = "Ошибка. Отсутствует файл 1"
             return render_template(
                 "add_task.html", title="Добавить задание", form=form, message=message)
+        files_str = ""
+        i = 1
+        for file_path in files:
+            filename = file_path.split("/")[-1]
+            files_str += f'<a href="../files/{filename}" target="blank">Файл {i}</a>'
+            files_str += " "
+            i += 1
+        files_str = files_str.strip()
+
         task = Task(
             html=html,
             answer=answer,
-            files=" ".join(map(lambda i, path: f'<a href="{path}">Файл {i}</a>', enumerate(files, 1))),
+            files=files_str,
             number=number,
             author_id=current_user.id
         )
@@ -337,10 +373,10 @@ def edit_task(id):
     form = TaskForm()
     if request.method == "GET":
         session = db_session.create_session()
-        tasks = session.query(Task).filter(Task.id == id, Task.author_id == current_user).first()
+        tasks = session.query(Task).filter(Task.id == id, Task.author_id == current_user.id).first()
         if tasks:
             form.number.data = tasks.number
-            form.task.data = tasks.html
+            form.task.data = tasks.html[3:-4]
             form.answer.data = tasks.answer
         else:
             abort(404)
@@ -349,11 +385,25 @@ def edit_task(id):
         tasks = session.query(Task).filter(Task.id == id).first()
         if tasks:
             tasks.number = form.number.data
-            tasks.html = form.task.data
             tasks.answer = form.answer.data
-
             file1: FileStorage = form.file1.data
             file2: FileStorage = form.file2.data
+            image: FileStorage = form.img.data
+            condition = form.task.data
+            if condition.startswith("<p>") and condition.endswith("</p>"):
+                html = condition
+            else:
+                html = f"<p>{condition}</p>"
+            if image.filename:
+                if "." not in image.filename or not any(
+                        ext in image.filename for ext in ("jpeg", "png", "jpg", "gif", "bmp")):
+                    message = "Ошибка. Изображение является некорректным."
+                    return render_template(
+                        "edit_task.html", title="Добавить задание", form=form, message=message)
+                ext = image.filename.split(".")[1]
+                image.stream.seek(0)
+                html += f'<img width="350px" src="data:image/{ext};base64,{b64encode(image.stream.read()).decode("utf-8")}"/>'
+
             files = []
             last_task = session.query(Task).order_by(Task.id)[-1]
             if file1.filename or file2.filename:
@@ -362,10 +412,11 @@ def edit_task(id):
                         message = "Ошибка. Файл 1 является некорректным"
                         return render_template(
                             "edit_task.html", title="Добавить задание", form=form, message=message)
-                    path = f"db/files/{last_task.id + 1}_"
+                    path = f"files/{last_task.id + 1}_"
                     with open(path + f"1.{file1.filename.split('.')[1]}", "wb") as dst:
                         file1.stream.seek(0)
                         file1.save(dst)
+                        files.append(path + f"1.{file1.filename.split('.')[1]}")
                     if file2.filename:
                         if "." not in file2.filename:
                             message = "Ошибка. Файл 2 является некорректным"
@@ -375,11 +426,21 @@ def edit_task(id):
                         with open(path + f"2.{file2.filename.split('.')[1]}", "wb") as dst:
                             file2.stream.seek(0)
                             file2.save(dst)
+                            files.append(path + f"2.{file2.filename.split('.')[1]}")
                 if not file1.filename and file2.filename:
                     message = "Ошибка. Отсутствует файл 1"
                     return render_template(
                         "edit_task.html", title="Добавить задание", form=form, message=message)
-                tasks.files = " ".join(map(lambda e: f'<a href="{e}"</a>', files))
+                files_str = ""
+                i = 1
+                for file_path in files:
+                    filename = file_path.split("/")[-1]
+                    files_str += f'<a href="../files/{filename}" target="blank">Файл {i}</a>'
+                    files_str += " "
+                    i += 1
+                files_str = files_str.strip()
+                tasks.files = files_str
+                tasks.html = html
             session.commit()
             return redirect('/profile')
         else:
@@ -391,7 +452,7 @@ def edit_task(id):
 @login_required
 def task_delete(id):
     session = db_session.create_session()
-    task = session.query(Task).filter(Task.id == id, Task.author_id == current_user).first()
+    task = session.query(Task).filter(Task.id == id, Task.author_id == current_user.id).first()
     if task:
         session.delete(task)
         session.commit()
@@ -406,12 +467,18 @@ def add_variant():
     form = VariantForm()
     if form.validate_on_submit():
         session = db_session.create_session()
-        variant = Variants(tasks=', '.join(form.task.raw_data),
+        tasks = session.query(Task).filter(Task.id.in_(form.task.raw_data)).all()
+        tasks_ids = []
+        for task_id in form.task.raw_data:
+            for task in tasks:
+                if int(task_id) == task.id:
+                    tasks_ids.append(task_id)
+        variant = Variants(tasks=', '.join(tasks_ids),
                            time=int(form.time.data) * 60,
                            author_id=current_user.id)
         session.add(variant)
         session.commit()
-        return redirect('/')
+        return redirect('/profile')
     return render_template('add_variant.html', title='Создание варианта', form=form)
 
 
@@ -433,7 +500,13 @@ def edit_variant(id):
         session = db_session.create_session()
         variants = session.query(Variants).filter(Variants.id == id).first()
         if variants:
-            variants.tasks = ', '.join(form.task.raw_data)
+            tasks = session.query(Task).filter(Task.id.in_(form.task.raw_data)).all()
+            tasks_ids = []
+            for task_id in form.task.raw_data:
+                for task in tasks:
+                    if int(task_id) == task.id:
+                        tasks_ids.append(task_id)
+            variants.tasks = ', '.join(tasks_ids)
             variants.time = form.time.data
             session.commit()
             return redirect('/profile')
@@ -460,6 +533,11 @@ def variant_delete(id):
 @app.route("/index")
 def index():
     return render_template("index.html", title='КЕГЭ')
+
+
+@app.route("/files/<filename>")
+def get_file(filename):
+    return send_file(f"files/{filename}")
 
 
 if __name__ == "__main__":

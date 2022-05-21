@@ -4,7 +4,7 @@
 <div class="py-5">
     <h1 style="margin-top: 20px;">Изменение авторской задачи в базу заданий</h1>
     <p>В качестве номера задания указывайте номер задания в КИМ. Условие задачи необходимо написать в виде неразрывного текста
-    целиком. Для многострочного ответа в качестве символа разделения строк используйте &lt;br&gt;.</p>
+        целиком. Для многострочного ответа в качестве символа разделения строк используйте &lt;br&gt;.</p>
     <p>Для добавления задач по теории игр указывайте в качестве номера задачи номер 19.</p>
     <form action="" method="post" enctype="multipart/form-data">
         {{ form.hidden_tag() }}
@@ -12,55 +12,61 @@
             {{ form.number.label }}<br>
             {{ form.number(class="form-control") }}<br>
             {% for error in form.number.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
+        <p content="alert alert-danger" role="alert">
+            {{ error }}
         </p>
+        {% endfor %}
+        </p>
+        <p style="color:red;">Внимание!</p>
+        <p> Если ваша задача содержит изображение, то в поле условие задачи вы увидите служебную информацию о ней.<br> Чтобы
+            сохранить её, оставьте эту информацию неизменной. Если вы хотите обновить изображение, то в поле с условием необходимо
+            оставить только условие задачи и в соответствующем поле добавить новое изображение.</p>
         <p>
             {{ form.task.label }}<br>
             {{ form.task(class="form-control") }}<br>
             {% for error in form.task.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
+        <p content="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
         </p>
         <p>
             {{ form.answer.label }}<br>
             {{ form.answer(class="form-control") }}<br>
             {% for error in form.answer.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
+        <p content="alert alert-danger" role="alert">
+            {{ error }}
         </p>
+        {% endfor %}
+        </p>
+        <p style="color:red;">Внимание!</p>
+        <p>Если вы не хотите обновлять файлы к заданию, оставьте следующие поля "Файл 1" и "Файл 2" без изменений.</p>
         <p>
             {{ form.file1.label }}<br>
             {{ form.file1 }}<br>
             {% for error in form.file1.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
+        <p content="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
         </p>
         <p>
             {{ form.file2.label }}<br>
             {{ form.file2 }}<br>
             {% for error in form.file2.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
+        <p content="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
         </p>
         <p>
             {{ form.img.label }}<br>
             {{ form.img }}<br>
             {% for error in form.img.errors %}
-                <p content="alert alert-danger" role="alert">
-                    {{ error }}
-                </p>
-            {% endfor %}
+        <p content="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+        {% endfor %}
         </p>
         <p><input class="btn btn-primary" id="submit" name="submit" type="submit" value="Сохранить"></p>
         {{message}}
